@@ -229,4 +229,17 @@
     - 객체의 복사본을 만듦
     - 기본틀(prototype)으로부터 같은 속성 값을 가진 객체의 복사본을 생성 할 수 있음
     - 객체지향 프로그래밍의 정보은닉에 위배되는 가능성이 있으므로 복제할 객체는 cloneable인터페이스를 명시해야함
-    - 
+
+- ### Class 클래스
+
+  - 자바의 모든 클래스와 인터페이스는 컴파일 후 class 파일로 생성됨
+  - class 파일에는 객체의 정보(멤버변수 , 메서드 , 생성자등) 가 포함되어있다.
+  - Class 클래스는 컴파일된 class 파일에서 객체의 정보를 가져올 수 있음
+  - String s = new String();
+  - Class c = s.getClass();
+  - Class c = String.class;
+  - Class c = Class.forName("java.lang.string"); // 동적 로딩
+  - Reflection 프로그래밍
+    - class 클래스로부터 객체의 정보를 가져와 프로그래밍 하는 방식
+    - 로컬에 객체가 없고 자료형을 알 수 없는 경우 유용한 프로그래밍
+    - java.lang.reflect패키지에 있는 클래스 활용
