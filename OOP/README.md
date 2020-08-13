@@ -243,3 +243,52 @@
     - class 클래스로부터 객체의 정보를 가져와 프로그래밍 하는 방식
     - 로컬에 객체가 없고 자료형을 알 수 없는 경우 유용한 프로그래밍
     - java.lang.reflect패키지에 있는 클래스 활용
+
+- ### String 클래스
+
+  - string 클래스 선언하기
+
+    - String str1 = new String("abc")
+
+  - String값은 immutable하다. string class 를 찾아보게되면 final이기때문에 변하지 않는 값이다.
+
+  - ### String Builder 와 String buffer
+
+    - 가변적인 char[] 배열을 멤버변수로 가지고 있는 클래스
+    - 문자열을 변경하거나 연결하는 경우 사용하면 편리한 클래스
+    - String buffer는 멀티 쓰레드 프로그래밍에서 동기화(Synchronization)이 보장됨
+    - 단인 쓰레드 프로그래밍에서는 StringBuilder를 사용하는 것이 더 좋음
+    - toString() 메서드로 String반환
+
+- ### 제네릭 프로그래밍이란
+
+  - 변수의 선언이나 메서드의 매개변수를 하나의 참조자료형이 아닌 여러 자료형을 변환될수있도록 프로그래밍하는 방식
+  - 실제 사용되는 참조 자료형으로 변환은 컴파일러가 검증하므로 안정적인 프로그래밍 방식
+
+- ### 컬렉션 프레임 워크란
+
+  - 프로그램 구현에 필요한 자료구조와 알고리즘을 구현해 놓은 라이브러리
+  - java.util 패키지에 구현되어 있음
+  - 개발에 소요되는 시간을 절약하고 최적화된 라이브러리를 사용할 수있음
+  - Collection 인터페이스와 map 인터페이스로 구성됨
+  - Collection 인터페이스
+    - 하나의 객체의 관리를 위해 선언된 인터페이스로 필요한 기본 메서드가 선언되어있음
+    - Collection 하위에 list와 set이있다.
+    - list의 하위에는 Arraylist , vector , linkedList
+    - set의 하위에는 hashSet , TreeSet이 잇다.
+    - List 인터페이스는 순서가있는 자료관리 , 중복허용 stack , queue
+    - set인터페이스는 순서가 정해져있지않음 , 중복불허용
+  - Map 인터페이스 
+    - hashtable , hashmap , treemap으로 구성됨
+    - 쌍으로 이루어진 객체를 관리하는데 필요한 여러 메서드가 선언되어있음
+    - map을 사용하는 객체는 key-value쌍으로 되어있고 key는 증복될수 없음
+
+- ### List 인터페이스
+
+  - 객체를 순서에 따라 저장및 관리
+  - 배열의 기능을 구현하는 것
+  - ArrayList vs Vector
+    - 벡터는 멀티쓰레드 프로그램에서 동기화를 지원
+      - 동기화란 : 두개의 쓰레드가 동시에 하나의 리소스에 접근할때 순서를 맞추어서 데이터의 오류가 방지하지 않도록함
+    - capacity와 size는 다른 의미임
+      - capacity는 배열의 용량 , size는 요소의 개수
