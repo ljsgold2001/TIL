@@ -1,4 +1,4 @@
-- #1과목-2
+- 1과목-2
 
   성능데이터 모델이란
 
@@ -292,6 +292,8 @@
   \- 하나의 부서는 여러 명의 사원을 보유할 수 있다. - 한 명의 사원은 하나의 부서에 꼭 소속된다.
 
   ![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_161.jpg)
+
+  
 
   
 
@@ -607,6 +609,8 @@
 
 -  TRUNCATE TABLE TEAM; 
 
+- 
+
 ### DDL에서 오라클과 sql중 다른것
 
 - rename table
@@ -636,9 +640,9 @@
   - DELETE [FROM] 삭제를 원하는 정보가 들어있는 테이블명;
   - DELETE FROM PLAYER
 
----
+------
 
----
+------
 
 
 
@@ -650,9 +654,9 @@
   - 하지만 TURNCATE는 로그가 없으므로 ROLLBACK이 불가능하다.
     - 하지만 SQL server는 ROLLBACK 가능하다.
 
----
+------
 
----
+------
 
 - ### SELECT
 
@@ -710,5 +714,1095 @@
 
 
 
+- ## COMMIT - 오라클과 SQL 다름
+
+- 입력한 자료나 수정한 자료에 대해서 또는 삭제한 자료에 대해서 전혀 문제가 없다고 판단 되었을 경우 COMMIT 명령어를 통해서 트랜잭션을 완료할 수 있다.
+
+- 메모리 BUFFER에만 영향을 받았기 때문에 데이터 변경 이전상태로 복구 가능하다.(commit 전) 다른 사용자는 현재 사용자가 수행한 명령의 결과를 볼 수 없다. 변경된 행은 잠금(locking)이 설정 되어서 다른 사용자가 변경할 수 없다.
+
+- **오라클** 
+
+  - INSERT INTO PLAYER (PLAYER_ID, TEAM_ID, PLAYER_NAME, POSITION, HEIGHT, WEIGHT, BACK_NO) VALUES ('1997035', 'K02', '이운재', 'GK', 182, 82, 1); 
+  - COMMIT (커밋이 생성 되었다.)
+  - DELETE FROM PLAYER; 
+  - COMMIT(커밋이 생성 되었다.)
+
+- COMMIT 이후시점
+
+  - 데이터에 대한 변경 사항이 데이베이스에 반영된다.
+  - 이전 데이터는 영원히 잃어버리게 된다.
+  - 사용자는 결과를 볼 수 있다.
+  - LOCKING 이 풀리고 행을 조작할 수 있게 된다.
+
+- 오라클은 트랜잭션이 종료되게 되면 항상 COMMIT 이라던지 ROLLBACK을 해주어야하지만 SQL server는 AUTO COMMIT 이기 때문에 자동으로 처리된다.
+
+- **SQL server**
+
+  - Auto commit 이 기본 방식이며 DDL, DML을 수행할때 마다 DBMS가 트랜잭션을 컨트롤 하는 방식이다. 성공하면 자동 COMMIT 실패하면 자동 ROLLBACK
+  - 암시적 트랜잭션
+    - oracle과 같다. 시작은 DBMS가 처리하고 트랜잭션의 끝은 사용자가 COMMIT 혹은 ROLLBACK처리
+    - 인스턴스나 세션 단위로 설정가능
+    - 세션단위로 하기 위해서는 SET IMPLICIT TRANSACTION ON설정
+  - 명시적 트랜잭션
+    - 시작과 끝을 모두다 사용자가 명시적으로 지정한다.
+    - BEGIN TRANSACTION(BEGIN IN TRAN 구문도가능)
+    - 완료되면 COMMIT TRANSACTION(COMMIT)
+    - 혹은 ROLLBACK TRANSACTION(ROLLBACK)
+    - ROLLBACK을 만나면 최초의 BEGIN TRANSACTION시점까지 ROLLBACK수행
+
+- ## ROLLBACK - 오라클과 sql 다름
+
+- 데이터 변경사항이 취소되어 데이터의 이전 상태로 복구되며 관련된 행의 LOCKING이 풀리고 데이터를 변경할 수 있게 한다.
+
+- 오라클
+
+  - NSERT INTO PLAYER (PLAYER_ID, TEAM_ID, PLAYER_NAME, POSITION, HEIGHT, WEIGHT, BACK_NO) VALUES ('1999035', 'K02', '이운재', 'GK', 182, 82, 1); 
+  - ROLLBACK
+
+- SQL
+
+  - auto commit 이 default이기 때문에 명시적으로 해주어야한다.
+  - **BEGIN TRAN** INSERT INTO PLAYER (PLAYER_ID, TEAM_ID, PLAYER_NAME, POSITION, HEIGHT, WEIGHT, BACK_NO) VALUES ('1999035', 'K02', '이운재', 'GK', 182, 82, 1);
+  - ROLLBACK
+
+- 즉 데이터의 변경사항이 취소되고 행에대한 LOCKING이 풀리고 행을 조작할수 있게 된다.
+
+- 무결성 보장 
+
+  - 영구적인 변경을 하기 전에 데이터의 변경사항확인 가능, 논리적으로 연관된 작업을 그룹핑하여 처리 가능
+
+- ## SAVEPOINT
+
+- 저장점을 정의하면 ROLLBACK할때 트랜잭션에 포함된 전체 작업을 rollback하는 것이 아니라 savepoint 까지 일부만 롤백할 수 있다.
+
+- 오라클
+
+  - SAVEPOINT SVPT1;
+  - ROLLBACK TO SVPT1;
+    -  SAVEPOINT SVPT1; 
+    - INSERT INTO PLAYER (PLAYER_ID, TEAM_ID, PLAYER_NAME, POSITION, HEIGHT, WEIGHT, BACK_NO) VALUES ('1999035', 'K02', '이운재', 'GK', 182, 82, 1);
+    - . ROLLBACK TO SVPT1;
+
+- SQL
+
+  - SAVE **TRANSACTION** SVTR1;
+  - ROLLBACK **TRANSACTION** SVTR1;
+    - SAVE TRAN SVTR1;
+    - . INSERT INTO PLAYER (PLAYER_ID, TEAM_ID, PLAYER_NAME, POSITION, HEIGHT, WEIGHT, BACK_NO) VALUES ('1999035', 'K02', '이운재', 'GK', 182, 82, 1); 
+    - ROLLBACK TRAN SVTR1; 
+
+- ![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_171.jpg)
+
+  - 그림과 같이 A까지 rollback 을 하게 되면 A이후의 시점은 무효가 되기때문에 B까지 rollback 할 수 없다.
+  - 아무 시점 없이 ROLLBACK을 실행하게 되면 모든 변경사항을 취소하고 되돌아 간다.
+
+-  SELECT COUNT(*) FROM PLAYER; ->480
+
+-  SELECT COUNT(*) FROM PLAYER WHERE WEIGHT = 100; ->0
+
+  - INSERT INTO PLAYER (PLAYER_ID, TEAM_ID, PLAYER_NAME, POSITION, HEIGHT, WEIGHT, BACK_NO) VALUES ('1999035', 'K02', '이운재', 'GK', 182, 82, 1)
 
 
+
+- SAVEPOINT SVPT_A; 
+- UPDATE PLAYER SET WEIGHT = 100; 
+  - 481개의 행이 수정되었다.
+
+
+
+- SAVEPOINT SVPT_B; 
+- DELETE FROM PLAYER; 
+  - 481개의 행이 삭제 되었다.
+
+
+
+- SAVEPOINT B 저장점까지 롤백(ROLLBACK)을 수행하고 롤백 전후 데이터를 확인해본다.
+  -  SELECT COUNT(*) FROM PLAYER; COUNT(*)
+    - 결과는 0
+  - ROLLBACK TO SVPT_B; 이 쿼리문을 실행시킨다.
+  - SELECT COUNT(*) FROM PLAYER; COUNT(*)
+    - 결과는 481개의 행이 삭제된것들이 실행되지않고
+    - 결과는 481
+- SAVEPOINT A 저장점까지 롤백(ROLLBACK)을 수행하고 롤백 전후 데이터를 확인해본다.
+  - SELECT COUNT(*) FROM PLAYER WHERE WEIGHT = 100; 
+    - 결과는 481
+  - ROLLBACK TO SVPT_A; 
+  - SELECT COUNT(*) FROM PLAYER WHERE WEIGHT = 100;
+    - 결과는 0으로 몸무게가 100으로 고쳐덨던 쿼리문이 실행되지 않음
+- 트랜잭션 최초 시점까지 롤백(ROLLBACK)을 수행하고 롤백 전후 데이터를 확인해본다
+  - SELECT COUNT(*) FROM PLAYER; 
+    - 481개의 행이 현재 존재한다.
+  - ROLLBACK; 
+  - SELECT COUNT(*) FROM PLAYER
+    - savepoint 설정하지않았기때문에 모든 트랜잭션이 취소되고 
+    - 결과는 480
+- **오라클**의 트랜잭션은 sql문장을 시작하면 자동으로 시작되고 Commit이나 rollback을 해주어야 종료된다.
+  - 하지만 DDL문장을 실행하면 전후시점 자동 커밋
+  - 데이터베이스를 정상적으로 접속종료하면 자동 트랜잭션 커밋
+  - 에플리케이션이상종료로 데이터베이스와 단절되면 트랜잭션 자동 롤백
+- SQL SERVER는 기본이 AUTO COMMIT방식이다.
+  - 하지만 어플리케이션 이상 종료로 데이터베이스와 접속이 단절되면 자동 롤백
+
+
+
+- # WHERE 절
+
+- Where 절을 사용하지 않으면 FTS(full table scan)이 일어나게 된다.
+
+- SELECT [DISTINCT/ALL] 칼럼명 [ALIAS명] FROM 테이블명 WHERE 조건식;
+
+- ![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_172.jpg)
+
+- ### 비교연산자
+
+  
+
+- 연산자 우선순위를 염두해두지 않고 where절 을 작성하면 자료를 잘 찾을수 없을 수도 있다.
+
+- SELECT PLAYER_NAME 선수이름, POSITION 포지션, BACK_NO 백넘버, HEIGHT 키 
+  FROM PLAYER 
+  WHERE TEAM_ID = 'K02' ; ( TEAM ID는 char(3)이기때문에 따옴표 묶어야함)
+
+
+
+- 비교연산자가 둘다 char일때
+  - char의 크기가 다르면 space로 맞춘다.
+  - 서로 다른 문자가나올때까지
+  - 달라진 첫번째 문자의 값에따라 크기를 정함
+  - blank 수만 다르다면 서로 같은값으로 결정
+- 비 연산자의 어느한쪽이 varchar일때
+  - 서로 다른 문자가 나올때까지
+  - 짧으면 짧은것 까지만
+  - 길이가 같고 다른것이 없다면 같다고
+  - NOT NULL 까지의 길이를 말함
+- 상수값과 비교할 경우
+  - 상수쪽을 변수 타입과 동일하게 바꾼다.
+  - 변수가 char이면 위의 char유형 넣어줌
+  - 변수가 varchar이면 위의 varchar유형 넣어줌
+
+
+
+- ### SQL 연산자
+
+- ![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_176.jpg)
+
+- SELECT PLAYER_NAME 선수이름, POSITION 포지션, BACK_NO 백넘버, HEIGHT 키
+  FROM PLAYER
+  WHERE TEAM_ID IN ('K02','K07');
+
+- SELECT ENAME, JOB, DEPTNO 
+  FROM EMP 
+  WHERE (JOB, DEPTNO) IN (('MANAGER',20),('CLERK',30));
+
+  - ->다수이면 괄호를 씌워주어야 한다.
+
+-  SELECT PLAYER_NAME 선수이름, POSITION 포지션, BACK_NO 백넘버, HEIGHT 키
+  FROM PLAYER 
+  WHERE POSITION LIKE 'MF';
+
+  - 위와 같으면 안된다. 와일드카드이용 와일드 카드란?
+    - ![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_177.jpg)
+
+- SELECT PLAYER_NAME 선수이름, POSITION 포지션, BACK_NO 백넘버, HEIGHT 키 
+  FROM PLAYER 
+  WHERE PLAYER_NAME LIKE '장%';
+
+- SELECT PLAYER_NAME 선수이름, POSITION 포지션, BACK_NO 백넘버, HEIGHT 키 
+  FROM PLAYER 
+  WHERE HEIGHT BETWEEN 170 AND 180; 
+
+- NULL이란 값이 존재하지 않는 것으로 확정되지 않는 값을 표현할때 사용한다.
+
+  - 크거나 작지도 않고 0도 아닌 비교불가능한값이다.
+  - NULL과 수치연산하면 NULL return
+  - NULL과의 비교연산은 FALSE리턴
+  - = , > , < 비교 불가능 하면 FALSE
+
+- SELECT PLAYER_NAME 선수이름, POSITION 포지션, BACK_NO 백넘버, HEIGHT 키 
+  FROM PLAYER 
+  WHERE POSITION = NULL; 
+
+  - 위와같이 하면 실패
+
+- SELECT PLAYER_NAME 선수이름, POSITION 포지션, TEAM_ID 
+  FROM PLAYER 
+  WHERE POSITION **IS NULL**; (= NULL아니다.)
+
+-  SELECT PLAYER_NAME 선수이름, POSITION 포지션, BACK_NO 백넘버, HEIGHT 키 
+  FROM PLAYER 
+  WHERE TEAM_ID = 'K02' AND HEIGHT >= 170;
+
+- SELECT PLAYER_NAME 선수이름, POSITION 포지션, BACK_NO 백넘버, HEIGHT 키 
+  FROM PLAYER 
+  WHERE TEAM_ID IN ('K02','K07') AND POSITION = 'MF';
+
+- **@@@@@@@@@@@@@잘못된 예 @@@@@@@@@@@@@@@@**
+
+- SELECT PLAYER_NAME 선수이름, POSITION 포지션, BACK_NO 백넘버, HEIGHT 키
+  FROM PLAYER 
+  WHERE TEAM_ID = 'K02' OR TEAM_ID = 'K07' AND POSITION = 'MF' AND HEIGHT >= 170 AND HEIGHT <= 180;
+
+  - **@@@@@@올바른 예 @@@@@@@@@@@@@@@**
+  - SELECT PLAYER_NAME 선수이름, POSITION 포지션, BACK_NO 백넘버, HEIGHT 키 
+    FROM PLAYER 
+    WHERE (TEAM_ID = 'K02' OR TEAM_ID = 'K07') AND POSITION = 'MF' AND HEIGHT >= 170 AND HEIGHT <= 180;
+    - 논리연산자가 여러개 있을 경우에는 ()를 사용해야한다.
+      - 순서는 () , NOT , AND, OR
+    - @@@@@결과가 같은 예@@@@@@@@@@@2
+    - SELECT PLAYER_NAME 선수이름, POSITION 포지션, BACK_NO 백넘버, HEIGHT 키 
+      FROM PLAYER 
+      WHERE WHERE TEAM_ID IN ('K02','K07') AND POSITION = 'MF' AND HEIGHT BETWEEN 170 AND 180 ;
+
+- ### 부정 연산자
+
+- ![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_180.jpg)
+
+- SELECT PLAYER_NAME 선수이름, POSITION 포지션, BACK_NO 백넘버, HEIGHT 키 
+  FROM PLAYER 
+  WHERE TEAM_ID = 'K02' AND NOT POSITION = 'MF' AND NOT HEIGHT BETWEEN 175 AND 185;
+
+- 위와 같은 밑의 코드
+
+- SELECT PLAYER_NAME 선수이름, POSITION 포지션, BACK_NO 백넘버, HEIGHT 키 
+  FROM PLAYER 
+  WHERE TEAM_ID = 'K02' AND POSITION <> 'MF' AND HEIGHT NOT BETWEEN 175 AND 185;
+
+  - <> ->anis/iso 표준이고 모든운영체제에서 사용가능하고 같지않다는 뜻
+
+- SELECT PLAYER_NAME 선수이름, NATION 국적 
+  FROM PLAYER
+  WHERE NATION IS NOT NULL;
+
+
+
+- ### ROWNUM 
+
+- SELECT PLAYER_NAME 
+  FROM PLAYER 
+  WHERE ROWNUM = 1; 
+
+- SELECT PLAYER_NAME 
+  FROM PLAYER 
+  WHERE ROWNUM <= 1;
+
+- SELECT PLAYER_NAME 
+  FROM PLAYER 
+  WHERE ROWNUM < 2;
+
+- 두 건 이상의 N행을 가지고 오고 싶을때는 rownum =n;처럼사용 불가
+
+- SELECT PLAYER_NAME 
+  FROM PLAYER 
+  WHERE ROWNUM <= N;
+
+- SELECT PLAYER_NAME 
+  FROM PLAYER 
+  WHERE ROWNUM
+
+- 테이블 내의 고유한 키나 인덱스 값을 만들수 있다.
+
+  -  UPDATE MY_TABLE SET COLUMN1 = ROWNUM;
+
+
+
+- ### TOP/Expression
+
+  - SQL server는 top 절을 이용해서 결과 집합으로 출력되는 행의 개수를 제한 할 수 있다.
+  - expression은 반환할 행의 수를 지정하는 숫자이다.
+  - Percent: 쿼리 결과 집합에서 처음 expression%의 행만 반환됨
+  - with ties : order by만 지정된경우 사용가능
+  - Top N (percent)
+  - SELECT **TOP(1)** PLAYER_NAME 
+    FROM PLAYER; 
+  - SELECT **TOP(N)** PLAYER_NAME 
+    FROM PLAYER; 
+  - orderby는 차이를 부를수잇다.
+
+- # 내장함수 (BUILT IN FUNCTION)
+
+- 벤더에서 제공하는 함수는 built in function과 user defined function으로 나눌 수 있다.
+
+  - 내장함수
+    - 단일행함수
+      - 문자형, 숫자형,날짜형,변환형,NULL관련
+      - select, where, orderby 에 사용가능
+    - 다중행 함수 
+      - 집계함수 , 그룹함수 , 윈도우함수
+
+- 함수는 아무리 많아도 출력은 하나만 된다는 M:1 관계라는 중요한 특징이 있다.
+
+
+
+- ### 문자형 함수
+
+  - LOWER
+
+    - 문자열의 알파벳 문자를 소문자로 바꾸어준다.
+
+  - UPPER
+
+    - 문자열의 알파벳문자를 대문자로 바꾸어준다.
+
+  - ASCII
+
+    - 문자나 숫자를 아스키코드로 변환한다.
+
+  - CHR/CHAR
+
+    - 아스키를 문자나 숫자로 바꾸어준다.
+
+  - CONCAT(str1, str2)
+
+    - 문자열을 연결해주는 것으로 oracle에서는 || sql server 는 +와 동일
+
+  - SUBSTR(oracle)
+
+    - 문자열중에서 m위치에서 n개의 문자길이에 해당하는 문자를 돌려준다.
+    - n이 생략되면 끝까지다.
+
+  - SUBSTRING(sql server)
+
+    - 문자열중에서 m위치에서 n개의 문자길이에 해당하는 문자를 돌려준다.
+    - n이 생략되면 끝까지다.
+
+  - LENGTH/LEN(문자열)
+
+    - 문자열의 개수를 숫자값으로 돌려준다.
+
+  - LTRIM(문자열 , [, 지정문자])
+
+    - 문자열의 첫 문자부터 확인해서 지정문자가 나타나면 해당 문자를 제거한다. sql server는 공백제거만 가능하다.
+
+  - RTRIM(문자열, [,지정문자])
+
+    - 문자열의 마지막 문자부터 확인해서 지정문자가 나타나면 해당 문자를 제거한다. sql server는 공백제거만 가능하다
+
+  - TRIM(|leading|trailing|both 지정문자 from 문자열)
+
+    - 문자열에서 머리말, 꼬리말, 양쪽에 있는 지정문자를 제거한다.
+    - SQL에서는 trim 함수에서 지정문자 사용불가 공백제거만
+
+    
+
+- ![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_183.jpg)
+
+- 오라클
+
+  - SELECT LENGTH('SQL Expert') FROM DUAL;
+  - LENGTH('SQL Expert') 
+  -  SELECT LEN('SQL Expert') AS ColumnLength;
+  - SELECT CONCAT(PLAYER_NAME, ' 축구선수') 선수명 FROM PLAYER;
+  -  SELECT PLAYER_NAME || ' 축구선수' AS 선수명 
+    - **sql server** 에서는
+      - SELECT PLAYER_NAME + ' 축구선수' AS 선수명 FROM PLAYER;
+  -  SELECT STADIUM_ID, DDD||TEL as TEL, LENGTH(DDD||TEL) as T_LEN
+     FROM STADIUM;
+    - 결과
+      - D03 063273-1763 11
+        B02 031753-3956 11 
+        C06 054282-2002 11 
+        D01 061792-5600 11 ....
+    - SQL에서는
+      -  Server SELECT STADIUM_ID, DDD+TEL as TEL, LEN(DDD+TEL) as T_LEN 
+        FROM STADIUM;
+
+- ### 숫자형
+
+  - ABS(숫자)
+    - 절대값
+  - SIGN(숫자)
+    - 양수인지 음수인지
+  - MOD(int1 , int2)
+    - int1을 int2로 나누어 나머지를 리턴함 %로 대체 가능
+  - CEIL/CEILING(숫자) ->**오라클/sql**
+    - 숫자보다 크거나 같은 최소 정수리턴
+  - FLOOR(숫자)
+    - 숫자보다 작거나 같은 최대 정수리턴
+  - ROUND(숫자 [,m])
+    - 숫자를 소숫점 m자리에서 반올림하여 리턴
+    - m의 디폴트는 0
+  - TRUNC(숫자 [,m])
+    - 숫자를 소수 m 자리에서 잘라서 버린다.
+    - 디폴트는 0 
+    - Sql server는 안된다.
+  - SIN,COS,TAN
+    - 삼각함수 값을 리턴
+  - EXP(),POWER(),SQRT(),LOG(),LN()
+    - 지수 , 거듭제곱, 제곱근 , 자연로그값 리턴 
+
+
+
+- **![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_185.jpg)**
+
+- SQL
+
+-  소수점 이하 한 자리까지 반올림 및 내림하여 출력한다.
+
+  - SELECT ENAME, ROUND(SAL/12,1), TRUNC(SAL/12,1) 
+    FROM EMP
+
+- 정수 기준으로 반올림 및 올림하여 출력한다.
+
+  - SELECT ENAME, ROUND(SAL/12), CEILING(SAL/12) 
+    FROM EMP
+
+- ### 날짜형 함수
+
+- ![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_186.jpg)
+
+- ![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_187.jpg)
+
+- 오라클
+
+  - SELECT SYSDATE FROM DUAL;
+
+- sql
+
+  - SELECT GETDATE() AS CURRENTTIME; 
+
+- &&&&&&&&&&&&&&&&&&&&&&&&&익숙하지 않는 부분&&&&&&&&&&&&&&7
+
+- 사원(EMP) 테이블의 입사일자에서 년, 월, 일 데이터를 각각 출력한다. 아래 4개의 SQL 문장은 같은 기능을 하는 SQL 문장이다
+
+  - **오라클**
+  - EXTRACT(MONTH FROM HIREDATE) 입사월, EXTRACT(DAY FROM HIREDATE) 입사일 
+    FROM EMP;
+  - SELECT ENAME, HIREDATE, TO_NUMBER(TO_CHAR(HIREDATE,'YYYY')) 입사년도, TO_NUMBER(TO_CHAR(HIREDATE,'MM')) 입사월, TO_NUMBER(TO_CHAR(HIREDATE,'DD')) 입사일 
+    FROM EMP; 
+  - **SQL**
+  - SELECT ENAME, HIREDATE, DATEPART(YEAR, HIREDATE) 입사년도, DATEPART(MONTH, HIREDATE) 입사월, DATEPART(DAY, HIREDATE) 입사일
+     FROM EMP;
+  - SELECT ENAME, HIREDATE, YEAR(HIREDATE) 입사년도, MONTH(HIREDATE) 입사월, DAY(HIREDATE) 입사일 
+    FROM EMP;
+
+  -
+
+- ### 변환형 함수
+
+  - 데이터타입을 다양한 형식으로 출력하고 싶을 경우 사용하는 것이다.
+    - 명시적 데이터 유형 변환
+      - 데이터 변환형 함수로 데이터 유형을 변환하도록 명시해 주는 경우
+    - 암시적 데이터 유형 변환
+      - 데이터베이스가 자동으로 데이터 유형을 변환하여 계산하는 경우
+  - 암시적보다는 명시적이 성능도 좋고 정확하다.
+  - ![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_189.jpg)
+  - **오라클**
+  - SELECT TO_CHAR(SYSDATE, 'YYYY/MM/DD') 날짜, TO_CHAR(SYSDATE, 'YYYY. MON, DAY') 문자형 FROM DUAL;
+    - 결과
+      - 2012-07-19 2012. 7월 , 월요일
+  - **SQL**
+    - SELECT CONVERT(VARCHAR(10),GETDATE(),111) AS CURRENTDATE
+      - 결과
+      - 2012/07/19
+  - 금액을 달러와 원화로 표시한다.
+  - 오라클
+    - SELECT TO_CHAR(123456789/1200,'$999,999,999.99') 환율반영달러, TO_CHAR(123456789,'L999,999,999') 원화 FROM DUAL; 
+    - 결과
+      - $102,880.66 \123,456,789 
+  - 팀(TEAM) 테이블의 ZIP 코드1과 ZIP 코드2를 숫자로 변환한 후 두 항목을 더한 숫자를 출력한다.
+    - 오라클
+      - SELECT TEAM_ID, TO_NUMBER(ZIP_CODE1,'999') + TO_NUMBER(ZIP_CODE2,'999') 우편번호합 
+        FROM TEAM;
+    - SQL
+      - SELECT TEAM_ID, CAST(ZIP_CODE1 AS INT) + CAST(ZIP_CODE2 AS INT) 우편번호합 FROM TEAM;
+
+
+
+- ### CASE 표현
+
+-  ANSI/ISO SQL 표준에는 CASE Expression이라고 표시되어 있다.
+
+- ![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_190.jpg)
+
+- 대표적으로 크게 simpole case expression / searched case expression이 있다.
+
+-  부서 정보에서 부서 위치를 미국의 동부, 중부, 서부로 구분하라.
+
+  - SELECT LOC, 
+    		CASE LOC
+    			 WHEN
+    						 'NEW YORK' THEN 'EAST' 
+    			 WHEN 
+    						 'BOSTON' THEN 'EAST' 
+    		     WHEN 
+    						 'CHICAGO' THEN 'CENTER' 
+    			 WHEN
+    						 'DALLAS' THEN 'CENTER' 
+    			 ELSE 
+    						 'ETC' 
+    		END as AREA
+    FROM DEPT;
+
+- 사원 정보에서 급여가 3000 이상이면 상등급으로, 1000 이상이면 중등급으로, 1000 미만이면 하등급으로 분류하라.
+
+  - SELECT ENAME, 
+    		CASE
+    			 WHEN 
+    				SAL >= 3000 THEN 'HIGH' 
+    			 WHEN 
+    				SAL >= 1000 THEN 'MID' 
+    			 ELSE
+    				 'LOW' 
+    			 END AS SALARY_GRADE 
+    FROM EMP;
+
+- 사원 정보에서 급여가 2000 이상이면 보너스를 1000으로, 1000 이상이면 5000으로, 1000 미만이면 0으로 계산한다.
+
+  - SELECT ENAME,SAL
+    		CASE
+    			WHEN
+    				SAL >=2000 THEN 1000
+    			ELSE(
+    				CASE
+    					WHEN 
+    						SAL >=1000 THEN 5000
+    					ELSE
+    						0
+    				END)
+    		END as BONUS
+    FROM EMP;
+
+- ### NULL 관련함수
+
+- ![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_191.jpg)
+
+- ![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_192.jpg)
+
+- 오라클의 경우 NVL사용 SQL일 경우 ISNULL 사용
+
+  - NVL (NULL 판단 대상,‘NULL일 때 대체값’)
+  - ISNULL (NULL 판단 대상,‘NULL일 때 대체값’)
+
+- 오라클
+
+  - SELECT NVL(NULL, 'NVL-OK') NVL_TEST FROM DUAL;
+  - SELECT NVL('Not-Null', 'NVL-OK') NVL_TEST FROM DUAL; 
+
+- SQL
+
+  - SELECT ISNULL(NULL, 'NVL-OK') ISNULL_TEST
+  - SELECT ISNULL('Not-Null', 'NVL-OK') ISNULL_TEST ;
+
+- 선수 테이블에서 성남 일화천마(K08) 소속 선수의 이름과 포지션을 출력하는데, 포지션이 없는 경우는 '없음'으로 표시한다.
+
+  - 오라클
+    - SELECT PLAYER_NAME 선수명, POSITION, **NVL(POSITION,'없음')** 포지션 FROM PLAYER
+      WHERE TEAM_ID = 'K08'
+  - SQL
+    - SELEC PLAYER_NAME 선수명, POSITION, **ISNULL(POSITION,'없음')** 포지션 FROM PLAYER 
+      WHERE TEAM_ID = 'K08'
+      - SELECT PLAYER_NAME 선수명, POSITION, 
+                  CASE** 
+        				**WHEN POSITION IS NULL**
+        					 **THEN '없음'** 
+        				**ELSE POSITION** 
+        		END AS 포지션** 
+        FROM PLAYER 
+        WHERE TEAM_ID = 'K08'
+
+  
+
+- 급여와 커미션을 포함한 연봉을 계산하면서 NVL 함수의 필요성을 알아본다.
+
+  - SELECT ENAME 사원명, SAL 월급, COMM 커미션, (SAL * 12) + COMM 연봉A, (SAL * 12) + NVL(COMM,0) 연봉B 
+    FROM EMP;
+
+- ### NULL 과 공집합
+
+- 정상적으로 매니저 정보를 가지고 있는 SCOTT의 매니저를 출력한다.
+
+  - SELECT MGR
+     FROM EMP 
+    WHERE ENAME='SCOTT'; 
+
+- SELECT 1 FROM DUAL WHERE 1 = 2;
+
+  - 대표적으로 공집합을 발생시키는 쿼리이며 위와 같은 조건에 맞는 데이터가 한건도 없는 경우 공집합이라고 하고 NULL 데이터와는 다르게 이해해야한다.
+
+- ### NULL IF
+
+- NULLIF (EXPR1, EXPR2)
+
+  - EXPR1 과 EXPR2이 같으면 NULL을 같지 않으면 EXPR1을 리턴한다.
+  - 특정값을 NULL로 대체하는 경우에 유용하게 사용할수 있다.
+
+- 사원 테이블에서 MGR와 7698이 같으면 NULL을 표시하고, 같지 않으면 MGR를 표시한다.
+
+  - SELECT ENAME, EMPNO, MGR, NULLIF(MGR,7698)
+    FROM EMP;
+    - SELECT ENAME, EMPNO, MGR, 
+      		CASE 
+      			WHEN MGR = 7698 
+      					THEN NULL 
+      			ELSE MGR 
+      		END
+      FROM EMP;
+
+- ### COALESCE
+
+  - 인수의 숫자가 한정되어 있지 않으며 임의의 개수 EXPR에서 NULL이 아닌 최초의 EXPR을 나타낸다. 만약 모든 EXPR이 NULL이라면 NULL 리턴
+
+
+
+- 사원 테이블에서 커미션을 1차 선택값으로, 급여를 2차 선택값으로 선택하되 두 칼럼 모두 NULL인 경우는 NULL로 표시한다
+  - SELECT ENAME, COMM, SAL, COALESCE(COMM, SAL) COAL 
+    FROM EMP;
+    - SELECT ENAME, COMM, SAL, 
+      		CASE 
+      				WHEN COMM IS NOT NULL 
+      							THEN COMM
+      				ELSE 
+      						(CASE 
+      								WHEN SAL IS NOT NULL 
+      										THEN SAL 
+      								ELSE NULL 
+      						END) 
+      		END COAL
+       FROM EMP;
+
+
+
+# GROUP BY / HAVING 절
+
+- SELECT COUNT(*) "전체 행수", COUNT(HEIGHT) "키 건수", MAX(HEIGHT) 최대키, MIN(HEIGHT) 최소키, ROUND(AVG(HEIGHT),2) 평균키
+   FROM PLAYER;
+- 결과값
+  - 480 447 196 165 179.31
+  - 전체행과 count(height)가 다른것은 후자는  null을 포함하지 않는다.
+-  집계 함수의 통계 정보는 NULL 값을 가진 행을 제외하고 수행한다
+- 집계 함수는 WHERE 절에는 올 수 없다. (집계 함수를 사용할 수 있는 GROUP BY 절보다 WHERE 절이 먼저 수행된다
+- WHERE 절은 전체 데이터를 GROUP으로 나누기 전에 행들을 미리 제거시킨다.
+- AVING 절은 GROUP BY 절의 기준 항목이나 소그룹의 집계 함수를 이용한 조건을 표시할 수 있다.
+- GROUP BY 절에 의한 소그룹별로 만들어진 집계 데이터 중, HAVING 절에서 제한 조건을 두어 조건을 만족하는 내용만 출력한다.
+- 그룹으로 묶어도 자동으로 오름차순정렬이었으나 원칙은 orderby로 정렬해주어야한다.
+
+
+
+- K-리그 선수들의 포지션별 평균키는 어떻게 되는가란 요구 사항을 접수하였다. GROUP BY 절을 사용하지 않고 집계 함수를 사용했을 때 어떤 결과를 보이는지 포지션별 평균키를 구해본다.
+
+  - ### 오류
+
+  - SELECT POSITION 포지션, AVG(HEIGHT) 평균키
+    FROM PLAYER; 
+
+    - select에서 오류다. 그룹을 정해주지 않았기 때문이다.
+
+  - SELECT POSITION 포지션, AVG(HEIGHT) 평균키 
+    FROM PLAYER 
+    GROUP BY POSITION 포지션;
+
+    - GROUP BY POSITION 포지션;이부분오류 ALIAS 사용 불가
+
+  - ### 정답
+
+  - SELECT POSITION 포지션, COUNT(*) 인원수, COUNT(HEIGHT) 키대상, MAX(HEIGHT) 최대키, MIN(HEIGHT) 최소키, ROUND(AVG(HEIGHT),2) 평균키 FROM PLAYER 
+    GROUP BY POSITION;
+
+- ## HAVING
+
+- K-리그 선수들의 포지션별 평균키를 구하는데, 평균키가 180 센티미터 이상인 정보만 표시하라는 요구 사항이 접수되었으므로 WHERE 절과 GROUP BY 절을 사용해 SQL 문장을 작성한다.
+
+- SELECT POSITION 포지션, ROUND(AVG(HEIGHT),2) 평균키 
+  FROM PLAYER
+  WHERE **AVG(HEIGHT) >= 180  오류 - 집계함수 사용불가**
+  GROUP BY POSITION
+
+- 수정후
+
+- SELECT POSITION 포지션, ROUND(AVG(HEIGHT),2) 평균키 
+  FROM PLAYER
+  GROUP BY POSITION 
+  HAVING AVG(HEIGHT) >= 180;
+
+- 논리적 순서는 having 과 group by의 순서가 바뀌어 서 실행된다.
+  
+
+- K-리그의 선수들 중 삼성블루윙즈(K02)와 FC서울(K09)의 인원수는 얼마인가란 요구 사항이 접수되었다. WHERE 절과 GROUP BY 절을 사용한 SQL과 GROUP BY 절과 HAVING 절을 사용한 SQL을 모두 작성한다.
+
+- SELECT TEAM_ID 팀ID, COUNT(*) 인원수 
+  FROM PLAYER 
+  WHERE TEAM_ID IN ('K09', 'K02') 
+  GROUP BY TEAM_ID; 
+
+- SELECT TEAM_ID 팀ID, COUNT(*) 인원수 
+  FROM PLAYER 
+  GROUP BY TEAM_ID 
+  HAVING TEAM_ID IN ('K09', 'K02'); 
+
+- 가능하면 where 절에서 제거하는것이 조금더 효율적이다.
+
+- 포지션별 평균키만 출력하는데, 최대키가 190cm 이상인 선수를 가지고 있는 포지션의 정보만 출력한다.
+
+- SELECT POSITION 포지션, ROUND(AVG(HEIGHT),2) 평균키 
+  FROM PLAYER 
+  GROUP BY POSITION 
+  HAVING MAX(HEIGHT) >= 190; 주의요함
+
+
+
+- ## CASE 표현을 활용한 월별 데이터 집계
+
+- 집계 함수(CASE( ))~GROUP BY” 기능은 정해진 컬럼수만큼 확장해서 집계보고서를 만드는 기법이다.
+
+- ### step1
+
+  - 먼저 개별 입사정보에서 월별 데이터를 추출하는 작업을 진행한다. 이 단계는 월별 정보가 있다면 생략 가능하다.
+
+    - 오라클
+
+      - SELECT ENAME, DEPTNO, EXTRACT(MONTH FROM HIREDATE) 입사월, SAL 
+        FROM EMP;
+
+    - SQL
+
+      - SELECT ENAME, DEPTNO, DATEPART(MONTH, HIREDATE) 입사월, SAL FROM EMP;
+      - SELECT ENAME, DEPTNO, MONTH(HIREDATE) 입사월, SAL 
+        FROM EMP;
+
+    - 결과물
+
+      - ENAME DEPTNO 입사월 SAL
+        SMITH 20 12 800
+
+        ALLEN 30 2 1600
+        WARD 30 2 1250
+        JONES 20 4 2975 
+        MARTIN 30 9 1250 
+
+- ### STEP2(월별 데이터 구분)
+
+- 출된 MONTH 데이터를 Simple Case Expression을 이용해서 12개의 월별 칼럼으로 구분한다. 실행 결과에서 보여 주는 ENAME 칼럼은 최종 리포트에서 요구되는 데이터는 아니지만, 정보의 흐름을 이해하기 위해 부가적으로 보여 주는 임시 정보이다. 
+
+- 이런 긴 문장을 해결해주는 것이 DECODE
+
+- 이분은 그냥 읽어봐
+
+
+
+- # ORDER BY
+
+- 정렬을 하기위한 구문으로 ALIAS명이나 컬럼순서를 나타내는 정수도 사용가능
+
+- 별도로 지정하지않으면 오름차순이 적용되며 SQL 문장의 제일 마지막에 위치
+
+
+
+- 선수 테이블에서 선수들의 이름, 포지션, 백넘버를 출력하는데 사람 이름을 내림차순으로 정렬하여 출력한다.
+  - SELECT PLAYER_NAME 선수명, POSITION 포지션, BACK_NO 백넘버 
+    FROM PLAYER 
+    ORDER BY PLAYER_NAME DESC;
+- ORDER BY 절의 예로 선수 테이블에서 선수들의 이름, 포지션, 백넘버를 출력하는데 선수들의 포지션 내림차순으로 출력한다. 칼럼명이 아닌 ALIAS를 이용한다.
+  - SELECT PLAYER_NAME 선수명, POSITION 포지션, BACK_NO 백넘버
+    FROM PLAYER 
+    ORDER BY 포지션 DESC;
+- 포지션별로 정렬을 하였는데 NULL이 있을 수도있다. 오라클은 null을 가장큰값으로 출력하지만 sql은 가장작은 값으로 취급
+
+
+
+- 한 개의 칼럼이 아닌 여러 가지 칼럼(Column)을 기준으로 정렬해본다. 먼저 키가 큰 순서대로, 키가 같은 경우 백넘버 순으로 ORDER BY 절을 적용하여 SQL 문장을 작성하는데, 키가 NULL인 데이터는 제외한다.
+  - SELECT PLAYER_NAME 선수이름, POSITION 포지션, BACK_NO 백넘버, HEIGHT 키 FROM PLAYER 
+    WHERE HEIGHT IS NOT NULL 
+    ORDER BY HEIGHT DESC, BACK_NO;
+- 속성과 alias 혼용 가능
+- 칼럼명 사용 ORDER BY 절 사용
+  - SELECT DNAME, LOC, DEPTNO 
+    FROM DEPT 
+    ORDER BY DNAME, LOC, DEPTNO DESC;
+- Case2. 칼럼명 + ALIAS 명 사용 ORDER BY 절 사용
+  - SELECT DNAME DEPT, LOC AREA, DEPTNO 
+    FROM DEPT 
+    ORDER BY DNAME, AREA, DEPTNO DESC;
+- Case3. 칼럼 순서번호 + ALIAS 명 사용 ORDER BY 절 사용
+  - SELECT DNAME, LOC AREA, DEPTNO 
+    FROM DEPT
+     ORDER BY 1, AREA, 3 DESC;
+
+## SELECT 문장 실행 순서
+
+- GROUP BY 절과 ORDER BY가 같이 사용될 때 SELECT 문장은 6개의 절로 구성이 되고, SELECT 문장의 수행 단계는 아래와 같다.
+
+  
+
+  - from
+  - where
+  - groupby
+  - having
+  - Select
+  - orderby
+
+-  SELECT 절에 없는 EMP 칼럼을 ORDER BY 절에 사용한다.
+
+  - SELECT EMPNO, ENAME
+    FROM EMP 
+    ORDER BY MGR;
+    - select 절에서 사용하지 않은 것을 사용해도 가능
+
+- 인라인 뷰에 정의된 SELECT 칼럼을 메인쿼리에서 사용한다.
+
+  - SELECT EMPNO 
+    FROM (SELECT EMPNO, ENAME 
+    			FROM EMP 
+    			ORDER BY MGR);
+    - SELECT MGR FROM (SELECT EMPNO, ENAME 
+      									FROM EMP 
+      									ORDER BY MGR); 
+      **에러발생 SELECT MGR FROM ; * ERROR: "MGR": 부적합한 식별자**
+      - 인쿼리 안에 없기 때문이다.
+    - SELECT JOB, SAL 
+      FROM EMP 
+      GROUP BY JOB 
+      HAVING COUNT(*) > 0 
+      ORDER BY SAL; 
+    - **에러발생 그룹으로 묶은 표현식이 아니다.**
+    - SELECT JOB 
+      FROM EMP 
+      GROUP BY JOB 
+      HAVING COUNT(*) > 0 
+      ORDER BY SAL; 
+    - **에러발생 orderby절에 일반컬럼 사용하였기때문에** job아닌 
+    - GROUP BY 절 사용시 ORDER BY 절에 집계 칼럼을 사용해본다.
+    - SELECT JOB 
+      FROM EMP 
+      GROUP BY JOB
+      HAVING COUNT(*) > 0 
+      ORDER BY MAX(EMPNO), MAX(MGR), SUM(SAL), COUNT(DEPTNO), MAX(HIREDATE);
+
+- ## TopN쿼리 
+
+- ### ROWNUM 오라클
+
+- Oracle에서 순위가 높은 N개의 로우를 추출하기 위해
+
+- 데이터의 일부가 먼저 추출된 후(ORDER BY 절은 결과 집합을 결정하는데 관여하지 않음) 데이터에 대한 정렬 작업이 일어나므로 주의해야 한다
+
+- SELECT ENAME, SAL 
+  FROM EMP 
+  WHERE ROWNUM < 4 
+  ORDER BY SAL DESC;
+
+- order by 가 없으면 오라클의 rownum과 sql의 top절은 같은 결과를 보인다. 
+
+- 하지만 order by절이 사용되는 경우 오라클은 orderby보다 먼저 쓰는  where절에서 처리하기 때문에 미리 인라인 뷰에서 정렬을 한후에 써야한다.
+
+  - SELECT ENAME, SAL 
+    FROM (SELECT ENAME, SAL 
+    			 FROM EMP 
+    			 ORDER BY SAL DESC) 
+    WHERE ROWNUM < 4 ;
+
+- ### TOP
+
+- TOP (Expression) [PERCENT] [WITH TIES]
+
+- With ties 옵션은 orderly 조건 기준으로 마지막 행으로 표시되는 추가행의 데이터가 같은 경우 N+동일 정렬 순서 데이터를 추가 반환하도록 지정하는 옵션이다.
+
+- 사원 테이블에서 급여가 높은 2명을 내림차순으로 출력하고자 한다.
+
+  -  SELECT TOP(2) ENAME, SAL 
+     FROM EMP 
+     ORDER BY SAL DESC;
+
+- 사원 테이블에서 급여가 높은 2명을 내림차순으로 출력하는데 같은 급여를 받는 사원이 있으면 같이 출력한다.
+
+  -  SELECT TOP(2) WITH TIES ENAME, SAL 
+     FROM EMP 
+     ORDER BY SAL DESC;
+
+- # JOIN
+
+- 일반적인 경우 행들은 PRIMARY KEY(PK)나 FOREIGN KEY(FK) 값의 연관에 의해 JOIN이 성립된다. 
+
+- 하지만 어떤 경우에는 이러한 PK, FK의 관계가 없어도 논리적인 값들의 연관만으로 JOIN이 성립 가능하다
+
+- FROM 절에 여러 테이블이 나열되더라도 SQL에서 데이터를 처리할 때는 단 두 개의 집합 간에만 조인이 일어난다.
+
+- A, B, C 테이블이 나열되었더라도 특정 2개의 테이블만 먼저 조인 처리되고, 2개의 테이블이 조인되어서 처리된 새로운 데이터 집합과 남은 한 개의 테이블이 다음 차례로 조인된다. 
+
+- A, B, C, D 4개의 테이블을 조인하고자 할 경우 옵티마이저는 ( ( (A JOIN D) JOIN C) JOIN B)
+
+
+
+- ### EQUI JOIN
+
+  - 두 개의 테이블 간에 컬럼 값들이 서로 정확하게 일치하는 경우에 사용하는 방법이다.(PK,FK)기반이다. 반드시 지켜야하지는 않다.
+
+  - SELECT PLAYER.PLAYER_NAME 선수명, TEAM.TEAM_NAME 소속팀명 
+    FROM PLAYER, TEAM
+     WHERE PLAYER.TEAM_ID = TEAM.TEAM_ID;
+
+    
+
+  -  또는 INNER JOIN을 명시하여 사용할 수도 있다. 
+
+    
+
+  - SELECT PLAYER.PLAYER_NAME 선수명, TEAM.TEAM_NAME 소속팀명 
+    FROM PLAYER INNER JOIN TEAM 
+    ON PLAYER.TEAM_ID = TEAM.TEAM_ID;
+
+    
+
+  - 두개의 테이블에 중복되는 컬럼이있다면 꼭 테이블이름 명시해주어야한다.
+
+- ![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_195.jpg)
+
+- 선수(PLAYER) 테이블과 팀(TEAM) 테이블에서 K-리그 소속 선수들의 이름, 백넘버와 그 선수가 소속되어 있는 팀명 및 연고지를 알고 싶다는 요구사항을 확인한다
+
+- ![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_196.jpg)
+
+- SELECT PLAYER.PLAYER_NAME, PLAYER.BACK_NO, PLAYER.TEAM_ID, TEAM.TEAM_NAME, TEAM.REGION_NAME 
+  FROM PLAYER, TEAM 
+  WHERE PLAYER.TEAM_ID = TEAM.TEAM_ID; 
+
+  
+
+- 또는 INNER JOIN을 명시하여 사용할 수도 있다.
+
+  
+  
+
+-  SELECT PLAYER.PLAYER_NAME, PLAYER.BACK_NO, PLAYER.TEAM_ID, TEAM.TEAM_NAME, TEAM.REGION_NAME
+   FROM PLAYER INNER JOIN TEAM 
+  ON PLAYER.TEAM_ID = TEAM.TEAM_ID;
+
+
+
+- 좀더 간단하게 ALIAS를 이용하자
+
+
+
+- SELECT P.PLAYER_NAME 선수명, P.BACK_NO 백넘버, P.TEAM_ID 팀코드, T.TEAM_NAME 팀명, T.REGION_NAME 연고지
+  FROM PLAYER P, TEAM T 
+  WHERE P.TEAM_ID = T.TEAM_ID; 
+
+
+  또는 INNER JOIN을 명시하여 사용할 수도 있다. 
+
+  
+
+  SELECT P.PLAYER_NAME 선수명, P.BACK_NO 백넘버, P.TEAM_ID 팀코드, T.TEAM_NAME 팀명, T.REGION_NAME 연고지 
+  FROM PLAYER P INNER JOIN TEAM T 
+  ON P.TEAM_ID = T.TEAM_ID;
+
+
+
+- 위 SQL 문장의 WHERE 절에 포지션이 골키퍼인(골키퍼에 대한 포지션 코드는 ‘GK’임) 선수들에 대한 데이터만을 백넘버 순으로 출력하는 SQL문을 만들어 본다.
+
+
+
+- SELECT P.PLAYER_NAME 선수명, P.BACK_NO 백넘버, T.REGION_NAME 연고지, T.TEAM_NAME 팀명
+  FROM PLAYER P, TEAM T 
+  WHERE P.TEAM_ID = T.TEAM_ID AND P.POSITION = 'GK'
+  ORDER BY P.BACK_NO; 
+
+- 또는 INNER JOIN을 명시하여 사용할 수도 있다. 
+
+  
+
+- SELECT P.PLAYER_NAME 선수명, P.BACK_NO 백넘버, T.REGION_NAME 연고지, T.TEAM_NAME 팀명 
+  FROM PLAYER P INNER JOIN TEAM T ON P.TEAM_ID = T.TEAM_ID 
+  WHERE P.POSITION = 'GK' 
+  ORDER BY P.BACK_NO;
+
+
+
+- ### 오류
+
+- SELECT PLAYER.PLAYER_NAME 선수명, P.BACK_NO 백넘버, T.REGION_NAME 연고지, T.TEAM_NAME 팀명 
+  FROM PLAYER P, TEAM T 
+  WHERE P.TEAM_ID = T.TEAM_ID AND P.POSITION = 'GK' 
+  ORDER BY P.BACK_NO;
+
+
+
+- **오류 이유**
+
+- SELECT PLAYER.PLAYER_NAME 선수명, P.BACK_NO 백넘버, * 1행에 오류: ERROR: 열명이 부적합하다.
+
+
+
+-  팀(TEAM) 테이블과 구장(STADIUM) 테이블의 관계를 이용해서 소속팀이 가지고 있는 전용구장의 정보를 팀의 정보와 함께 출력하는 SQL문을 작성한다.
+
+
+
+- SELECT TEAM.REGION_NAME, TEAM.TEAM_NAME, TEAM.STADIUM_ID, STADIUM.STADIUM_NAME, STADIUM.SEAT_COUNT 
+  FROM TEAM, STADIUM 
+  WHERE TEAM.STADIUM_ID = STADIUM.STADIUM_ID; 
+
+  
+
+- 또는 INNER JOIN을 명시하여 사용할 수도 있다.
+   
+
+- SELECT TEAM.REGION_NAME, TEAM.TEAM_NAME, TEAM.STADIUM_ID, STADIUM.STADIUM_NAME, STADIUM.SEAT_COUNT
+  FROM TEAM INNER JOIN STADIUM 
+  ON TEAM.STADIUM_ID = STADIUM.STADIUM_ID;
+
+  
+
+-  위 SQL문과 ALIAS를 사용한 아래 SQL문은 같은 결과를 얻을 수 있다.
+
+  
+
+-  SELECT T.REGION_NAME, T.TEAM_NAME, T.STADIUM_ID, S.STADIUM_NAME, S.SEAT_COUNT 
+  FROM TEAM T, STADIUM S 
+  WHERE T.STADIUM_ID = S.STADIUM_ID; 
+
+- 또는 INNER JOIN을 명시하여 사용할 수도 있다. 
+  
+
+- SELECT T.REGION_NAME, T.TEAM_NAME, T.STADIUM_ID, S.STADIUM_NAME, S.SEAT_COUNT 
+  FROM TEAM T INNER JOIN STADIUM S 
+  ON T.STADIUM_ID = S.STADIUM_ID; 
+
+- 중복이 되지 않는 칼럼의 경우 ALIAS를 사용하지 않아도 되므로, 아래 SQL 문은 위 SQL문과 같은 결과를 얻을 수 있다. 그러나 같은 이름을 가진 중복 칼럼의 경우는 테이블명이나 ALIAS가 필수 조건이다. 
+  
+
+- SELECT REGION_NAME, TEAM_NAME, T.STADIUM_ID, STADIUM_NAME, SEAT_COUNT
+   FROM TEAM T, STADIUM S 
+  WHERE T.STADIUM_ID = S.STADIUM_ID;
+
+- **중복되는 ALIAS 만 붙여주면 된다.**
+
+
+
+- ## NON EQUI JOIN
+
+- Non EQUI JOIN의 경우에는 “=” 연산자가 아닌 다른(Between, >, >=, <, <= 등) 연산자들을 사용하여 JOIN을 수행하는 것이다
+
+
+
+- 어떤 사원이 받고 있는 급여가 어느 등급에 속하는 등급인지 알고 싶다는 요구사항에 대한 Non EQUI JOIN의 사례는 다음과 같다.
+-  SELECT E.ENAME, E.JOB, E.SAL, S.GRADE 
+  FROM EMP E, SALGRADE S 
+  WHERE E.SAL BETWEEN S.LOSAL AND S.HISAL;
+
+
+
+- SELECT E.ENAME 사원명, E.SAL 급여, S.GRADE 급여등급 
+  FROM EMP E, SALGRADE S 
+  WHERE E.SAL BETWEEN S.LOSAL AND S.HISAL;
+
+
+
+- ## 3개 이상의 TABLE JOIN
+
+- 선수 테이블의 소속팀코드(TEAM_ID)가 팀 테이블의 팀코드(TEAM_ID)와 PK-FK의 관계가 있다는 것을 알 수 있고, 운동장 테이블의 운동장코드(STADIUM_ID)와 팀 테이블의 전용구장코드(STADIUM_ID)가 PK-FK 관계인 것을 생각하며 다음 SQL을 작성한다. 세 개의 테이블에 대한 JOIN이므로 WHERE 절에 2개 이상의 JOIN 조건이 필요하다.
+
+  
+
+- SELECT P.PLAYER_NAME 선수명, P.POSITION 포지션, T.REGION_NAME 연고지, T.TEAM_NAME 팀명, S.STADIUM_NAME 구장명
+  FROM PLAYER P, TEAM T, STADIUM S 
+  WHERE P.TEAM_ID = T.TEAM_ID AND T.STADIUM_ID = S.STADIUM_ID 
+  ORDER BY 선수명; 
+
+  
+
+- 또는 INNER JOIN을 명시하여 사용할 수도 있다.
+
+  
+
+-  SELECT P.PLAYER_NAME 선수명, P.POSITION 포지션, T.REGION_NAME 연고지, T.TEAM_NAME 팀명, S.STADIUM_NAME 구장명 
+  FROM PLAYER P INNER JOIN TEAM T ON P.TEAM_ID = T.TEAM_ID INNER JOIN STADIUM S 
+  ON T.STADIUM_ID = S.STADIUM_ID 
+  ORDER BY 선수명;
