@@ -609,7 +609,11 @@
 
 -  TRUNCATE TABLE TEAM; 
 
-- 
+- truncate 와 drop은 로그를 남기지 않는다.
+
+- 턴케이트는 디스크용량도 초기화하지만 delete는 초기화하지 못한다.
+
+- drop은 스키마도 없에버린다.
 
 ### DDL에서 오라클과 sql중 다른것
 
@@ -1806,3 +1810,10 @@
   FROM PLAYER P INNER JOIN TEAM T ON P.TEAM_ID = T.TEAM_ID INNER JOIN STADIUM S 
   ON T.STADIUM_ID = S.STADIUM_ID 
   ORDER BY 선수명;
+
+
+
+
+
+# 2-2장
+
