@@ -1399,7 +1399,8 @@
 
   - ### 정답
 
-  - SELECT POSITION 포지션, COUNT(*) 인원수, COUNT(HEIGHT) 키대상, MAX(HEIGHT) 최대키, MIN(HEIGHT) 최소키, ROUND(AVG(HEIGHT),2) 평균키 FROM PLAYER 
+  - SELECT POSITION 포지션, COUNT(*) 인원수, COUNT(HEIGHT) 키대상, MAX(HEIGHT) 최대키, MIN(HEIGHT) 최소키, ROUND(AVG(HEIGHT),2) 평균키
+    eFROM PLAYER 
     GROUP BY POSITION;
 
 - ## HAVING
@@ -1817,3 +1818,911 @@
 
 # 2-2장
 
+## STANDARD SQL
+
+- 현재 기업형 DBMS는 순수 관계형 데이터베이스가 아닌 객체 지원기능이 포함딘 관계형 데이터베이스를 사용하고 있다.
+
+
+
+- 일반 집합 연산자
+  - Union
+    - 공통 교집합의 중복을 없애기 위한 사전작업으로 시스템에 부하를 준다.
+    - Union all 공통집합도 중복해서 보여준다.
+  - Intersection
+    - 두 집합의 공통집합을 추출한다.
+  - difference
+    - 첫번째 집합에서 두번째집합과의 공통집합 부분을 제외한다.
+    - 대다수는 except oracle은 minus를 사용한다.
+  - product
+    - cross product 라고 불리는 곱집합
+    - join 조건이 없는 경우 생길수있는 모든 조합
+    - 카티션 product 라고도 함
+- 8가지 관계형대수는 4개의 일반 집합 연산자와 순수 관계 연산자로 나뉜다.
+- 순수 관계 연산자
+  - select
+    - where 절로 구성 되어있다.
+    - Select 연산과 select 절의 의미는 다른 것이다.
+  - project
+    - select 절로 구현되어있다.
+    - select 절의 컬럼 선택으로 구현된다.
+  - (natural join)
+    - 다양한 join 조건이 있다.
+    - Natural join ,inner join, outer join, using 조건절 ,on 조건절
+  - divide
+    - 사용되지 않음
+    - 
+
+
+
+- FROM 절 join 형태
+  - INNER JOIN
+    - where 절에서부터 사용하던 default옵션으로 join default옵션으로 join 조건에서 동일한 값이 있는 행만 반환한다.
+    - Cross join, outer join과 한번에 사용 불가
+  - NATURAL JOIN
+    - inner join의 하위 개념으로 동일한 이름을 갖는 컬럼에 equi join을 수행한다. Natural inner join 이라고표시가능
+  - USING조건절
+  - ON 조건절
+  - CROSS JOIN
+  - OUTER JOIN
+  - sql server는 on 조건절만 지원하고 natural join 과 using 조건절을 지원하지 않는다.
+
+
+
+- ## INNER JOIN
+
+- 내부 조인이라고 부른다.
+
+- join 조건에서 동일한 값이 있는 행만 반환한다.
+
+- using이나 on 필수
+
+
+
+- 예제] 사원 번호와 사원 이름, 소속부서 코드와 소속부서 이름을 찾아본다.
+
+  
+
+- WHERE 절 JOIN 조건 
+  SELECT EMP.DEPTNO, EMPNO, ENAME, DNAME 
+  FROM EMP, DEPT 
+  WHERE EMP.DEPTNO = DEPT.DEPTNO;
+
+  
+
+  
+
+-  위 SQL과 아래 SQL은 같은 결과를 얻을 수 있다. 
+  
+
+- FROM 절 JOIN 조건 
+  
+
+- SELECT EMP.DEPTNO, EMPNO, ENAME, DNAME 
+  FROM EMP INNER JOIN DEPT 
+  ON EMP.DEPTNO = DEPT.DEPTNO; 
+
+  INNER는 JOIN의 디폴트 옵션으로 아래 SQL문과 같이 생략 가능하다. 
+
+  SELECT EMP.DEPTNO, EMPNO, ENAME, DNAME
+  FROM EMP JOIN DEPT 
+  ON EMP.DEPTNO = DEPT.DEPTNO;
+
+
+
+- ## NATURAL JOIN
+
+- 동일한 이름을 갖는 모든 컬럼들에 대해  EQUI JOIN수행한다.
+
+- Using, on , where에 join 조건 ,sql server 지원 불가
+
+
+
+- 사원 번호와 사원 이름, 소속부서 코드와 소속부서 이름을 찾아본다.
+  - SELECT DEPTNO, EMPNO, ENAME, DNAME 
+    FROM EMP NATURAL JOIN DEPT;
+  - join에 사용한 컬럼들은 같은 유형이어야하며 alias나 테이블명과같은 접두사를 붙일 수 없다.
+  - 별도의 순서를 지정해주지 않으면 natural join의 기준이되는 컬럼부터 출력된다.
+  - SELECT * FROM EMP NATURAL JOIN DEPT;
+    - 결과의 시작은 deptno부터 나오게 된다.
+  - 하지만 inner join의 경우 첫번째 두번때 테이블의 컬럼이 순서대로 출력된다.
+    - [예제] SELECT * 
+      		  FROM EMP INNER JOIN DEPT 
+      		  ON EMP.DEPTNO = DEPT.DEPTNO;
+
+
+
+
+
+- **Oracle** CREATE TABLE DEPT_TEMP AS SELECT * FROM DEPT;
+- **SQL Server** SELECT * INTO DEPT_TEMP FROM DEPT;
+- UPDATE DEPT_TEMP SET DNAME = 'R&D'
+   WHERE DNAME = 'RESEARCH'; 
+- UPDATE DEPT_TEMP SET DNAME = 'MARKETING'
+   WHERE DNAME = 'SALES'; 
+-  SELECT * FROM DEPT_TEMP;
+
+
+
+- 실행결과
+  - DEPT_TEMP 테이블
+  - 10 ACCOUNTING NEW YORK 
+    20 R&D DALLAS 
+    30 MARKETING CHICAGO 
+    40 OPERATIONS BOSTON 
+- SELECT * 
+  FROM DEPT NATURAL INNER JOIN DEPT_TEMP;
+  SELECT * 
+  FROM DEPT NATURAL JOIN DEPT_TEMP;
+
+
+
+- **실행결과**
+
+  - 10 ACCOUNTING NEW YORK 
+    40 OPERATIONS BOSTON
+
+- SELECT * 
+  FROM DEPT JOIN DEPT_TEMP 
+  ON DEPT.DEPTNO = DEPT_TEMP.DEPTNO AND DEPT.DNAME = DEPT_TEMP.DNAME AND DEPT.LOC = DEPT_TEMP.LOC;
+
+-  위 SQL과 아래 SQL은 같은 결과를 얻을 수 있다. 
+
+  
+
+- SELECT * 
+  FROM DEPT, DEPT_TEMP 
+  WHERE DEPT.DEPTNO = DEPT_TEMP.DEPTNO AND DEPT.DNAME = DEPT_TEMP.DNAME AND DEPT.LOC = DEPT_TEMP.LOC;
+
+
+
+- **실행결과**
+- 10 ACCOUNTING NEW YORK 
+  10 ACCOUNTING NEW YORK 
+  40 OPERATIONS BOSTON 
+  40 OPERATIONS BOSTON 
+
+
+
+## USING 조건절
+
+
+
+- 자연 조인에서는 모든 일치되는 컬럼들에 의해서만 join 이 이루어 진다.
+- from 의 using 조건절을 이용하면 같은 이름을 가진 컬럼중에서 원하는 컬럼에 대해서만 선택적으로 equi join이 가능하다. sql server는 지원하지 않는다.
+
+- SELECT * 
+  FROM DEPT JOIN DEPT_TEMP 
+  USING (DEPTNO)
+  - 위와같이 *로 뽑으면 using에서 사용한것이 처음으로 나오게 된다.
+
+
+
+- SELECT DEPT.DEPTNO, DEPT.DNAME, DEPT.LOC, DEPT_TEMP.DNAME, DEPT_TEMP.LOC
+  FROM DEPT JOIN DEPT_TEMP 
+  USING (DEPTNO); 
+  - Join 컬럼에대해서는 alias 나 테이블이름과 같은 접두사를 붙일수 없다.
+  - DEPT.DEPTNO ->dept no
+- SELECT * 
+  FROM DEPT JOIN DEPT_TEMP 
+  USING (DNAME);
+  - 결과는 2개의 행
+- SELECT * 
+  FROM DEPT JOIN DEPT_TEMP 
+  USING (LOC, DEPTNO);
+  - 결과는 4개의 행
+- SELECT * 
+  FROM DEPT JOIN DEPT_TEMP 
+  USING (DEPTNO, DNAME);
+  - 결과는 2개의 행
+
+
+
+- ## ON조건절
+
+- 컬럼명이 달라도 join을 사용할수있다.
+
+- SELECT E.EMPNO, E.ENAME, E.DEPTNO, D.DNAME 
+  FROM EMP E JOIN DEPT D 
+  ON (E.DEPTNO = D.DEPTNO);
+
+- alias 사용가능
+
+- ### where 절과의 혼용가능
+
+-  **ON 조건절과 WHERE 검색 조건은 충돌 없이 사용할 수 있다.** 부서코드 30인 부서의 소속 사원 이름 및 소속 부서 코드, 부서 코드, 부서 이름을 찾아본다.
+
+  - SELECT E.ENAME, E.DEPTNO, D.DEPTNO, D.DNAME 
+    FROM EMP E JOIN DEPT D 
+    ON (E.DEPTNO = D.DEPTNO) 
+    WHERE E.DEPTNO = 30;
+
+- ON 조건절에 JOIN 조건 외에도 데이터 검색 조건을 추가할 수는 있으나, 검색 조건 목적인 경우는 WHERE 절을 사용할 것을 권고한다. (다만, 아우터 조인에서 조인의 대상을 제한하기 위한 목적으로 사용되는 추가 조건의 경우는 ON 절에 표기되어야 한다.)
+
+  - SELECT E.ENAME, E.MGR, D.DEPTNO, D.DNAME 
+    FROM EMP E JOIN DEPT D 
+    ON (E.DEPTNO = D.DEPTNO AND E.MGR = 7698); 
+  - SELECT E.ENAME, E.MGR, D.DEPTNO, D.DNAME 
+    FROM EMP E JOIN DEPT D 
+    ON (E.DEPTNO = D.DEPTNO) 
+    WHERE E.MGR = 7698;
+
+-  팀과 스타디움 테이블을 스타디움ID로 JOIN하여 팀이름, 스타디움ID, 스타디움 이름을 찾아본다.
+
+- SELECT TEAM_NAME, TEAM.STADIUM_ID, STADIUM_NAME 
+  FROM TEAM JOIN STADIUM 
+  ON TEAM.STADIUM_ID = STADIUM.STADIUM_ID
+  ORDER BY STADIUM_ID;;
+
+  - stadium_id라는 공통 조건이 있기 때문이다.
+
+  
+
+- SELECT TEAM_NAME, STADIUM_ID, STADIUM_NAME 
+  FROM TEAM JOIN STADIUM 
+  USING (STADIUM_ID) 
+  ORDER BY STADIUM_ID;
+
+  - inner join 사용 가능
+
+- SELECT TEAM_NAME, TEAM.STADIUM_ID, STADIUM_NAME 
+  FROM TEAM, STADIUM 
+  WHERE TEAM.STADIUM_ID = STADIUM.STADIUM_ID 
+  ORDER BY STADIUM_ID
+
+
+
+- 팀과 스타디움 테이블을 팀ID로 JOIN하여 팀이름, 팀ID, 스타디움 이름을 찾아본다. STADIUM에는 팀ID가 HOMETEAM_ID라는 칼럼으로 표시되어 있다.
+
+
+
+- SELECT TEAM_NAME, TEAM_ID, STADIUM_NAME
+  FROM TEAM JOIN STADIUM 
+  ON TEAM.TEAM_ID = STADIUM.HOMETEAM_ID 
+  ORDER BY TEAM_ID; 
+
+  - innerjoin 방식 사용 가능
+
+- SELECT TEAM_NAME, TEAM_ID, STADIUM_NAME 
+  FROM TEAM, STADIUM 
+  WHERE TEAM.TEAM_ID = STADIUM.HOMETEAM_ID 
+  ORDER BY TEAM_ID;
+
+- 공통인 컬럼의 ID가 다르기때문에  using 사용 불가
+
+  
+
+- ## 다중 테이블 JOIN
+
+- 사원과 DEPT 테이블의 소속 부서명, DEPT_TEMP 테이블의 바뀐 부서명 정보를 출력한다.
+
+- SELECT E.EMPNO, D.DEPTNO, D.DNAME, T.DNAME New_DNAME FROM EMP E JOIN DEPT D 
+  ON (E.DEPTNO = D.DEPTNO) 
+  JOIN DEPT_TEMP T 
+  ON (E.DEPTNO = T.DEPTNO); 
+
+- SELECT E.EMPNO, D.DEPTNO, D.DNAME, T.DNAME New_DNAME FROM EMP E, DEPT D, DEPT_TEMP T 
+  WHERE E.DEPTNO = D.DEPTNO AND E.DEPTNO = T.DEPTNO;
+
+- GK 포지션의 선수별 연고지명, 팀명, 구장명을 출력한다.
+
+- SELECT P.PLAYER_NAME 선수명, P.POSITION 포지션, T.REGION_NAME 연고지명, T.TEAM_NAME 팀명, S.STADIUM_NAME 구장명 
+  FROM PLAYER P JOIN TEAM T 
+  ON P.TEAM_ID = T.TEAM_ID 
+  JOIN STADIUM S 
+  ON T.STADIUM_ID = S.STADIUM_ID 
+  WHERE P.POSITION = 'GK' 
+  ORDER BY 선수명; 
+
+- SELECT P.PLAYER_NAME 선수명, P.POSITION 포지션, T.REGION_NAME 연고지명, T.TEAM_NAME 팀명, S.STADIUM_NAME 구장명 
+  FROM PLAYER P, TEAM T, STADIUM S 
+  WHERE P.TEAM_ID = T.TEAM_ID AND T.STADIUM_ID = S.STADIUM_ID AND P.POSITION = 'GK' 
+  ORDER BY 선수명;
+
+
+
+## CROSS JOIN
+
+- join조건이 없는 경우 생길수 있는 모든 데이터 조합이다.
+- M*N의 조합이 생길수있다.
+- 사원 번호와 사원 이름, 소속부서 코드와 소속부서 이름을 찾아본다.
+- SELECT ENAME, DNAME
+   FROM EMP CROSS JOIN DEPT 
+  ORDER BY ENAME;
+- Natural join 은 where 절에서 join 조건을 추가할 수 없지만 cross join은 where 절에 join 조건을 추가 할 수 있다.
+- SELECT ENAME, DNAME 
+  FROM EMP CROSS JOIN DEPT 
+  WHERE EMP.DEPTNO = DEPT.DEPTNO;
+- SELECT ENAME, DNAME 
+  FROM EMP INNER JOIN DEPT 
+  WHERE EMP.DEPTNO = DEPT.DEPTNO;
+
+
+
+## OUTER JOIN
+
+## left outer JOIN
+
+- 조인 수행시 좌측 테이블에 해당하는 데이터를 먼저 읽은 후에 나중 표기된 우측테이블에서 join 대상 데이터를 읽어 온다.
+
+  - B의 join 컬럼에서 같은값이 있으면 가져오고 없다면 NULL값으로 가져온다.
+
+- STADIUM에 등록된 운동장 중에는 홈팀이 없는 경기장도 있다. STADIUM과 TEAM을 JOIN 하되 홈팀이 없는 경기장의 정보도 같이 출력하도록 한다.
+
+  - SELECT STADIUM_NAME, STADIUM.STADIUM_ID, SEAT_COUNT, HOMETEAM_ID, TEAM_NAME 
+    FROM STADIUM LEFT OUTER JOIN TEAM 
+    ON STADIUM.HOMETEAM_ID = TEAM.TEAM_ID 
+    ORDER BY HOMETEAM_ID; 
+  - SELECT STADIUM_NAME, STADIUM.STADIUM_ID, SEAT_COUNT, HOMETEAM_ID, TEAM_NAME 
+    FROM STADIUM LEFT JOIN TEAM 
+    ON STADIUM.HOMETEAM_ID = TEAM.TEAM_ID 
+    ORDER BY HOMETEAM_ID;
+
+- ## RIGHT OUTER JOIN
+
+- A,B중에 B가 기준이 된다.
+
+- A와 B를 비교해서 A의 join 컬럼에서 같은값이 있으면 해당 데이터를 가져오고 A의 join 컬럼에서 같은 경우가 없으면 A테이블에서 가져오는 컬럼들을 NULL로 채운다.
+
+  
+
+- DEPT에 등록된 부서 중에는 사원이 없는 부서도 있다. DEPT와 EMP를 조인하되 사원이 없는 부서 정보도 같이 출력하도록 한다.
+
+  - ELECT E.ENAME, D.DEPTNO, D.DNAME 
+    FROM EMP E RIGHT OUTER JOIN DEPT D 
+    ON E.DEPTNO = D.DEPTNO; 
+  - SELECT E.ENAME, D.DEPTNO, D.DNAME, D.LOC 
+    FROM EMP E RIGHT JOIN DEPT D 
+    ON E.DEPTNO = D.DEPTNO;
+
+
+
+- ## FULL OUTER JOIN
+
+- A와 B를 left outer join + right outerjoin 한것과 동일하다.
+
+- Union all 이 아닌 union과 같다. 중복된 데이터는 삭제한다.
+
+
+
+# 집합연산자
+
+![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_204.jpg)
+
+- Union = 중복행은 하나의 행으로 만든다.
+- Union all = 중복행도 그대로 결과가 나온다. ,단순히 결과만
+- Intersect =교집합이다 . 중복은 하나의 행으로
+- Except =차집합 , 중복행은 하나의 행으로 만듬(minus)
+- 집합 연산자는 select 문을 연결 하는 것에 지나지 않는다. oreder by는 가장 마지막에 위치한다.
+
+ 1) K-리그 소속 선수들 중에서 소속이 삼성블루윙즈팀인 선수들과전남드레곤즈팀인 선수들에 대한 내용을 모두보고 싶다. 
+1) K-리그 소속 선수 중 소속이 삼성블루윙즈팀인 선수들의 집합과K-리그 소속 선수 중 소속이 전남드레곤즈팀인 선수들의 집합의 합집합
+
+
+
+SELECT TEAM_ID 팀코드, PLAYER_NAME 선수명, POSITION 포지션, BACK_NO 백넘버, HEIGHT 키 
+FROM PLAYER 
+WHERE TEAM_ID = 'K02' 
+**UNION** 
+SELECT TEAM_ID 팀코드, PLAYER_NAME 선수명, POSITION 포지션, BACK_NO 백넘버, HEIGHT 키 
+FROM PLAYER
+ WHERE TEAM_ID = 'K07'
+
+
+
+ K-리그 소속 선수들 중에서 소속이 삼성블루윙즈팀인 선수들과 포지션이 골키퍼(GK)인 선수들을 모두 보고 싶다. 
+2) K-리그 소속 선수 중 소속이 삼성블루윙즈팀인 선수들의 집합과K-리그 소속 선수 중 포지션이 골키퍼(GK)인 선수들의 집합의 합집합
+
+SELECT TEAM_ID 팀코드, PLAYER_NAME 선수명, POSITION 포지션, BACK_NO 백넘버, HEIGHT 키 
+FROM PLAYER 
+WHERE TEAM_ID = 'K02' 
+**UNION** 
+SELECT TEAM_ID 팀코드, PLAYER_NAME 선수명, POSITION 포지션, BACK_NO 백넘버, HEIGHT 키 
+FROM PLAYER 
+WHERE POSITION = 'GK';
+
+
+
+
+
+SELECT TEAM_ID 팀코드, PLAYER_NAME 선수명, POSITION 포지션, BACK_NO 백넘버, HEIGHT 키 
+FROM PLAYER 
+WHERE TEAM_ID = 'K02' OR POSITION = 'GK';
+
+
+
+
+
+K-리그 소속 선수들에 대한 정보 중에서 포지션별 평균키와 팀별 평균키를 알고 싶다. 
+3) K-리그 소속 선수 중 포지션별 평균키에 대한 집합과K-리그 소속 선수 중 팀별 평균키에 대한 집합의 합집합
+
+
+
+SELECT 'P' 구분코드, POSITION 포지션, AVG(HEIGHT) 평균키 
+FROM PLAYER 
+GROUP BY POSITION 
+UNION 
+SELECT 'T' 구분코드, TEAM_ID 팀명, AVG(HEIGHT) 평균키 
+FROM PLAYER 
+GROUP BY TEAM_ID 
+ORDER BY 1;
+
+
+
+
+
+4) K-리그 소속 선수를 중에서 소속이 삼성블루윙즈팀이면서 포지션이 미드필더(MF)가 아닌 선수들의 정보를 보고 싶다. 
+4) K-리그 소속 선수 중 소속이 삼성블루윙즈팀인 선수들의 집합과K-리그 소속 선수 중 포지션이 미드필더(MF))인 선수들의 집합의 차집합
+
+
+
+- 오라클
+- SELECT TEAM_ID 팀코드, PLAYER_NAME 선수명, POSITION 포지션, BACK_NO 백넘버, HEIGHT 키 
+  FROM PLAYER 
+  WHERE TEAM_ID = 'K02' 
+  MINUS 
+  SELECT TEAM_ID 팀코드, PLAYER_NAME 선수명, POSITION 포지션, BACK_NO 백넘버, HEIGHT 키 
+  FROM PLAYER 
+  WHERE POSITION = 'MF' 
+  ORDER BY 1, 2, 3, 4, 5
+
+
+
+- sql
+
+  - SELECT TEAM_ID 팀코드, PLAYER_NAME 선수명, POSITION 포지션, BACK_NO 백넘버, HEIGHT 키 
+    FROM PLAYER X 
+    WHERE X.TEAM_ID = 'K02' AND NOT EXISTS (
+    SELECT 1 
+    FROM PLAYER Y 
+    WHERE Y.PLAYER_ID = X.PLAYER_ID AND POSITION = 'MF') 
+    ORDER BY 1, 2, 3, 4, 5; 
+
+  
+
+  SELECT TEAM_ID 팀코드, PLAYER_NAME 선수명, POSITION 포지션, BACK_NO 백넘버, HEIGHT 키 
+  FROM PLAYER 
+  WHERE TEAM_ID = 'K02' AND PLAYER_ID NOT IN (SELECT PLAYER_ID FROM PLAYER WHERE POSITION = 'MF') 
+  ORDER BY 1, 2, 3, 4, 5;
+
+
+
+-  K-리그 소속 선수들 중에서 소속이 삼성블루윙즈팀이면서 포지션이 골키퍼(GK)인 선수들의 정보를 보고 싶다.
+   5) K-리그 소속 선수 중 소속이 삼성블루윙즈팀인 선수들의 집합과K-리그 소속 선수 중 포지션이 골키퍼(GK)인 선수들의 집합의 교집합
+
+
+
+- SELECT TEAM_ID 팀코드, PLAYER_NAME 선수명, POSITION 포지션, BACK_NO 백넘버, HEIGHT 키 
+  FROM PLAYER 
+  WHERE TEAM_ID = 'K02' 
+  **INTERSECT** 
+  SELECT TEAM_ID 팀코드, PLAYER_NAME 선수명, POSITION 포지션, BACK_NO 백넘버, HEIGHT 키
+   FROM PLAYER 
+  WHERE POSITION = 'GK' 
+  ORDER BY 1, 2, 3, 4, 5;
+
+
+
+- SELECT TEAM_ID 팀코드, PLAYER_NAME 선수명, POSITION 포지션, BACK_NO 백넘버, HEIGHT 키 
+  FROM PLAYER X 
+  WHERE X.TEAM_ID = 'K02' AND EXISTS (SELECT 1 FROM PLAYER Y WHERE Y.PLAYER_ID = X.PLAYER_ID AND Y.POSITION = 'GK') 
+  ORDER BY 1, 2, 3, 4, 5;
+
+
+
+- SELECT TEAM_ID 팀코드, PLAYER_NAME 선수명, POSITION 포지션, BACK_NO 백넘버, HEIGHT 키
+   FROM PLAYER 
+  WHERE TEAM_ID = 'K02' AND PLAYER_ID IN (SELECT PLAYER_ID FROM PLAYER WHERE POSITION = 'GK') ORDER BY 1, 2, 3, 4, 5;
+
+
+
+
+
+- ## 서브쿼리
+
+- ① 서브쿼리를 괄호로 감싸서 사용한다. 
+  ② 서브쿼리는 단일 행(Single Row) 또는 복수 행(Multiple Row) 비교 연산자와 함께 사용 가능하다. 단일 행 비교 연산자는 서브쿼리의 결과가 반드시 1건 이하이어야 하고 복수 행 비교 연산자는 서브쿼리의 결과 건수와 상관 없다.
+   ③ 서브쿼리에서는 ORDER BY를 사용하지 못한다. ORDER BY절은 SELECT절에서 오직 한 개만 올 수 있기 때문에 ORDER BY절은 메인쿼리의 마지막 문장에 위치해야 한다.
+
+
+
+- 서브쿼리가 사용가능한 곳
+
+  -  SELECT 절 
+  - FROM 절 
+  - WHERE 절 
+  - HAVING 절 
+  - ORDER BY 절 
+  - INSERT문의 VALUES 절 
+  - UPDATE문의 SET 절
+
+- ![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_215.jpg)
+
+- ![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_216.jpg)
+
+- ### 단일행 서브쿼리
+
+  
+
+- 서브쿼리가 단일행 연산 (=, <, <=, >, >=, <>) 일때는 서브쿼리의 결과 건수가 반드시 1건 이하여야한다.
+
+- SELECT PLAYER_NAME 선수명, POSITION 포지션, BACK_NO 백넘버 
+  FROM PLAYER 
+  WHERE TEAM_ID = (SELECT TEAM_ID FROM PLAYER WHERE PLAYER_NAME = '정남일') 
+  ORDER BY PLAYER_NAME;
+
+  - **만약 정남일이라는 선수가 두명이라면 오류 반환한다.**
+
+
+
+- SELECT PLAYER_NAME 선수명, POSITION 포지션, BACK_NO 백넘버 
+  FROM PLAYER 
+  WHERE HEIGHT <= (SELECT AVG(HEIGHT) FROM PLAYER) 
+  ORDER BY PLAYER_NAME;
+
+
+
+- ### 다중행 서브쿼리
+
+- ![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_219.jpg)
+
+- 선수들 중에서 ‘정현수’라는 선수가 소속되어 있는 팀 정보를 출력하는 서브쿼리를 작성하면 다음과 같다.
+
+- SELECT REGION_NAME 연고지명, TEAM_NAME 팀명, E_TEAM_NAME 영문팀명 
+  FROM TEAM 
+  WHERE TEAM_ID = (SELECT TEAM_ID FROM PLAYER WHERE PLAYER_NAME = '정현수') 
+  ORDER BY TEAM_NAME;
+
+- "= " 라는 연산자를 사용했는데 서브쿼리의 결과가 1개 이상이기때문에 에러를 반환한다.
+
+- 따라서 이런식으로 바뀌어야 한다.
+
+- SELECT REGION_NAME 연고지명, TEAM_NAME 팀명, E_TEAM_NAME 영문팀명 
+  FROM TEAM 
+  WHERE TEAM_ID **IN** (SELECT TEAM_ID FROM PLAYER WHERE PLAYER_NAME = '정현수') 
+  ORDER BY TEAM_NAME;
+
+### 다중 컬럼 서브 쿼리 - SQL 지원 안함
+
+
+
+- 서브쿼리의 결과가 여러 컬럼이기때문에 메인 쿼리의 조건과 동시에 비교되는 것이다.
+- SELECT TEAM_ID 팀코드, PLAYER_NAME 선수명, POSITION 포지션, BACK_NO 백넘버, HEIGHT 키 
+  FROM PLAYER
+  WHERE (TEAM_ID, HEIGHT) IN (SELECT TEAM_ID, MIN(HEIGHT)
+   FROM PLAYER 
+   GROUP BY TEAM_ID)
+  ORDER BY TEAM_ID, PLAYER_NAME;
+
+### 연관 서브 쿼리
+
+- 서브쿼리 내에 메인 쿼리 컬럼이 사용되었다.
+- SELECT T.TEAM_NAME 팀명, M.PLAYER_NAME 선수명, M.POSITION 포지션, M.BACK_NO 백넘버, M.HEIGHT 키 
+  FROM PLAYER M, TEAM T 
+  WHERE M.TEAM_ID = T.TEAM_ID AND M.HEIGHT < **( SELECT** **AVG(S.HEIGHT)**
+   **FROM PLAYER S** 
+  **WHERE S.TEAM_ID = M.TEAM_ID AND S.HEIGHT IS NOT NULL** 
+  **GROUP BY S.TEAM_ID )** 
+  ORDER BY 선수명;
+
+
+
+- EXISTS 서브쿼리를 사용하여 '20120501' 부터 '20120502' 사이에 경기가 있는 경기장을 조회하는 SQL문이다.
+
+  - SELECT STADIUM_ID ID, STADIUM_NAME 경기장명 
+    FROM STADIUM A 
+    WHERE **EXISTS (SELECT 1** 
+    							**FROM SCHEDULE X** 
+    							**WHERE X.STADIUM_ID = A.STADIUM_ID AND** 							**X.SCHE_DATE BETWEEN '20120501' AND									'20120502')**
+
+- ### SELECT 절에 서브쿼리 사용하기
+
+-  SELECT PLAYER_NAME 선수명, HEIGHT 키, (SELECT AVG(HEIGHT) FROM PLAYER X WHERE X.TEAM_ID = P.TEAM_ID) 팀평균키 
+  FROM PLAYER P
+
+- ### FROM절에서 서브쿼리 사용하기
+
+  - from 절에서 사용하는 서브쿼리를 인라인 뷰라고 한다.
+  - 일반적인 뷰를 정적인 뷰라고하고 인라인뷰를 동적뷰라고 한다.
+  - 서브쿼리의 컬럼은 메인쿼리에서 사용할 수 없다.
+  - 인라인 뷰의 컬럼은 어디서든지 사용가능하다.
+    - SELECT T.TEAM_NAME 팀명, P.PLAYER_NAME 선수명, P.BACK_NO 백넘버 FROM (SELECT TEAM_ID, PLAYER_NAME, BACK_NO
+      						 FROM PLAYER 
+      						 WHERE POSITION = 'MF') P, TEAM T 
+      WHERE P.TEAM_ID = T.TEAM_ID 
+      ORDER BY 선수명;
+  - 오라클
+    - SELECT PLAYER_NAME 선수명, POSITION 포지션, BACK_NO 백넘버, HEIGHT 키 
+      FROM (SELECT PLAYER_NAME, POSITION, BACK_NO, HEIGHT 
+      			 FROM PLAYER 
+      			 WHERE HEIGHT IS NOT NULL 
+      			 ORDER BY HEIGHT DESC) 
+      WHERE ROWNUM <= 5
+  - SQL
+    - Server SELECT TOP(5) PLAYER_NAME AS 선수명, POSITION AS 포지션, BACK_NO AS 백넘버, HEIGHT AS 키 
+      FROM PLAYER 
+      WHERE HEIGHT IS NOT NULL 
+      ORDER BY HEIGHT DESC
+
+- ### HAVING 절에서 서브쿼리 사용하기
+
+- 평균키가 삼성 블루윙즈팀의 평균키보다 작은 팀의 이름과 해당 팀의 평균키를 구하는 SQL문을 작성하면 다음과 같다.
+
+- SELECT P.TEAM_ID 팀코드, T.TEAM_NAME 팀명, AVG(P.HEIGHT) 평균키 FROM PLAYER P, TEAM T 
+  WHERE P.TEAM_ID = T.TEAM_ID 
+  GROUP BY P.TEAM_ID, T.TEAM_NAME 
+  HAVING AVG(P.HEIGHT) **< (SELECT AVG(HEIGHT) FROM PLAYER WHERE TEAM_ID ='K02')**
+
+
+
+- ### UPDATE문의 SET 절에서 사용하기
+
+- **UPDATE** TEAM A **SET** A.STADIUM_NAME = **(SELECT X.STADIUM_NAME FROM STADIUM X WHERE X.STADIUM_ID = A.STADIUM_ID);**
+
+
+
+- ### INSERT 문에서 서브쿼리 이용하기
+
+- INSERT INTO PLAYER(PLAYER_ID, PLAYER_NAME, TEAM_ID) VALUES(**(SELECT TO_CHAR(MAX(TO_NUMBER(PLAYER_ID))+1**) 
+  FROM PLAYER), '홍길동', 'K06');
+
+
+
+## 뷰
+
+- 독립성 : 데이터구조가 변경되어도 뷰를 사용하는 응용프로그램은 변경하지 않아도 된다.
+- 편리성 : SQL문을 단순하게 작성할 수 있다.
+- 보안성: 숨기고 싶은 정보가 존재한다면 정보를 감출 수 있다.
+
+
+
+- CREATE VIEW V_PLAYER_TEAM A**S SELECT** P.PLAYER_NAME, P.POSITION, P.BACK_NO, P.TEAM_ID, T.TEAM_NAME **FROM** PLAYER P, TEAM T **WHERE** P.TEAM_ID = T.TEAM_ID;
+
+
+
+- CREATE VIEW V_PLAYER_TEAM_FILTER **AS** **SELECT** PLAYER_NAME, POSITION, BACK_NO, TEAM_NAME **FROM** V_PLAYER_TEAM **WHERE** POSITION **IN** ('GK', 'MF');
+
+
+
+- # 그룹함수
+
+- ### ROLLUP
+
+-	Grouping colums의 수가 N이면 N+1 level의 subtotal이 생성됨
+
+
+
+
+
+- #### 일반적인 group by 절 사용
+
+  
+
+- SELECT DNAME, JOB, COUNT(*) "Total Empl", SUM(SAL) "Total Sal" 
+  FROM EMP, DEPT 
+  WHERE DEPT.DEPTNO = EMP.DEPTNO 
+  GROUP BY DNAME, JOB;
+
+
+
+- #### group by + order By 절 사용
+
+  
+
+- SELECT DNAME, JOB, COUNT(*) "Total Empl", SUM(SAL) "Total Sal" 
+  FROM EMP, DEPT 
+  WHERE DEPT.DEPTNO = EMP.DEPTNO 
+  GROUP BY DNAME, JOB 
+  ORDER BY DNAME, JOB;
+
+
+
+- #### rollup 함수 사용
+
+
+
+- SELECT DNAME, JOB, COUNT(*) "Total Empl", SUM(SAL) "Total Sal" 
+  FROM EMP, DEPT 
+  WHERE DEPT.DEPTNO = EMP.DEPTNO 
+  GROUP BY ROLLUP (DNAME, JOB);
+
+
+
+- #### rollup 함수 사용 + order by절 사용
+
+  
+
+-  SELECT DNAME, JOB, COUNT(*) "Total Empl", SUM(SAL) "Total Sal" FROM EMP, DEPT 
+  WHERE DEPT.DEPTNO = EMP.DEPTNO 
+  GROUP BY ROLLUP (DNAME, JOB) 
+  ORDER BY DNAME, JOB ;
+
+
+
+- #### grouping 함수 사용
+
+- ROLLUP이나 CUBE에 의한 소계가 계산된 결과에는 GROUPING(EXPR) = 1 이 표시되고, - 그 외의 결과에는 GROUPING(EXPR) = 0 이 표시된다
+
+- SELECT DNAME, GROUPING(DNAME), JOB, GROUPING(JOB), COUNT(*) "Total Empl", SUM(SAL) "Total Sal" 
+  FROM EMP, DEPT 
+  WHERE DEPT.DEPTNO = EMP.DEPTNO
+   GROUP BY ROLLUP (DNAME, JOB);
+
+
+
+#### grouping + case
+
+- SELECT 
+  	CASE GROUPING(DNAME) 
+  		WHEN 1 
+  				THEN 'All Departments' 
+  		ELSE DNAME 
+  				END AS DNAME, 
+  	CASE GROUPING(JOB) 
+  			WHEN 1 
+  				THEN 'All Jobs' 
+  			ELSE JOB 
+  				END AS JOB, COUNT(*) "Total Empl", SUM(SAL) "Total Sal" 
+  FROM EMP, DEPT 
+  WHERE DEPT.DEPTNO = EMP.DEPTNO 
+  GROUP BY ROLLUP (DNAME, JOB); 
+
+
+
+SELECT DNAME, JOB, MGR, SUM(SAL) "Total Sal"
+FROM EMP, DEPT 
+WHERE DEPT.DEPTNO = EMP.DEPTNO 
+GROUP BY ROLLUP (DNAME, (JOB, MGR));
+
+
+
+## CUBE
+
+SELECT 
+	CASE 
+		GROUPING(DNAME) 
+				WHEN 1 
+						THEN 'All Departments' 
+				ELSE DNAME 
+				END AS DNAME, 
+	CASE 
+		GROUPING(JOB) 
+				WHEN 1 
+					THEN 'All Jobs' 
+				ELSE JOB END AS JOB, COUNT(*) "Total Empl", SUM(SAL) "Total Sal" FROM EMP, DEPT 
+WHERE DEPT.DEPTNO = EMP.DEPTNO 
+GROUP BY CUBE (DNAME, JOB) ;
+
+
+
+## grouping sets 함수
+
+-  GROUP BY SQL 문장을 여러 번 반복하지 않아도 원하는 결과를 쉽게 얻을 수 있게 되었다
+- 계층 구조인 ROLLUP과는 달리 평등한 관계이므로 인수의 순서가 바뀌어도 결과는 같다
+- GROUPING SETS 함수도 결과에 대한 정렬이 필요한 경우는 ORDER BY 절에 명시적으로 정렬 칼럼이 표시가 되어야 한다.
+
+
+
+- SELECT DNAME, JOB, MGR, SUM(SAL) "Total Sal" 
+  FROM EMP, DEPT 
+  WHERE DEPT.DEPTNO = EMP.DEPTNO 
+  GROUP BY GROUPING SETS ((DNAME, JOB, MGR), (DNAME, JOB), (JOB, MGR));
+
+
+
+- # window 함수
+
+- 행과 행간의 관계를 쉽게 정의하기 위해 만든 함수가 바로 WINDOW FUNCTION이다. 
+
+-  WINDOW 함수는 기존에 사용하던 집계 함수도 있고, 새로이 WINDOW 함수 전용으로 만들어진 기능도 있다.
+
+- 그리고 WINDOW 함수는 다른 함수와는 달리 중첩(NEST)해서 사용하지는 못하지만, 서브쿼리에서는 사용할 수 있다.
+
+- SELECT WINDOW_FUNCTION (ARGUMENTS) OVER ( [PARTITION BY 칼럼] [ORDER BY 절] [WINDOWING 절] ) FROM 테이블 명;
+
+- **ROWS** : 물리적인 단위로 행 집합을 지정
+  **RANGE** : 논리적인 단위로 의해 행 집합을 지정
+  **BETWEEN ~ AND** : 윈도우의 시작과 끝 위치를 지정
+  **UNBOUNDED PRECEDING** : 윈도우 시작 위치가 첫 번째 로우임을 의미
+  **UNBOUNDED FOLLOWING** : 윈도우 마지막 위치가 마지막 로우임을 의미
+  **[ROW수] PRECEDING** : 윈도우 시작 위치가 ROW수만큼 이전이 시작 로우임을 의미
+  **[ROW수] FOLLOWING** : 윈도우 마지막 위치가 ROW수만큼 다음이 마지막 로우임을 의미
+  **CURRENT ROW** : 현재 로우까지를 의미
+
+- ## RANK
+
+  - SELECT JOB, ENAME, SAL, 
+    	RANK( ) OVER (ORDER BY SAL DESC) ALL_RANK, 
+    	RANK( ) OVER (PARTITION BY JOB ORDER BY SAL DESC) JOB_RANK 
+    FROM EMP;
+  - RANK 함수는 ORDER BY를 포함한 QUERY 문에서 특정 항목(칼럼)에 대한 순위를 구하는 함수이다.
+  - 이때 특정 범위(PARTITION) 내에서 순위를 구할 수도 있고 전체 데이터에 대한 순위를 구할 수도 있다. 또한 동일한 값에 대해서는 동일한 순위를 부여하게 된다.
+  - Partition by 로 나눔 -> order by로 정렬 동일한 값은 같은 우선순위를 매긴다.
+  - 동일 우선순위 매긴후에는 그값뺀이후 부터 정렬
+
+- ## DENSE RANK
+
+- DENSERANK는 동일한우선순위가 여러번나와도 다음은 하나 증가시킨다.
+
+- ## ROW_NUMBER
+
+- 그냥 모든 우선순위를 다매긴다.
+
+- ## SUM
+
+- 파티션별 윈도우의 합을 구하여 준다.
+
+- sql server는 over 절에 orderby 지원하지 않음
+
+- ## MAX 
+
+- 파티션별 윈도우의 최댓값을 보여준다.
+
+- ## MIN
+
+- 파티션별 최소값을 보여준다.
+
+- ## COUNT
+
+- order by sal range between 50 precending and 150 following 
+
+- 앞뒤로 50 뒤로 150 만큼 큰것들 카운트한다.
+
+- ## FIRST VALUE -SQL 지원 x
+
+- min 으로 같은 결과를 얻을 수 있다.
+
+- 파티션별로 가장 처음 나온 값을 구할수있다.
+
+- ## LAST_VALUE-sql지원 x
+
+- max 값으로 같은 결과를 얻을 수 있다.
+
+- 파티션 별로 가장 마지막에 나온 값을 구할 수 있다.
+
+- ## LAG 함수-sql 지원 x
+
+- LAG(SAL)- 한명 앞선 사람의 급여를 가져온다.
+
+- LAG(SAL,2,0) - 두명앞선 사람의 급여를 가져온다 나머진 null
+
+- ## LEAD 함수-sql 지원 x
+
+- LEAD(hiredate,1)
+
+- 이후의 첫번째 행의 값을 가져올수있다.
+
+- 3개의 argument 까지 사용할 수 있따.
+
+- 두번째 argu는 몇번째 행을 가져올것이냐 , 세번째는 Null일경우 바꿔줄 값을 지정한다.
+
+- 
+
+- ## RATIO_TO_REPORT-sqlx
+
+- ex) ratio_to_report((sal) over() ,2) 두번째자리
+
+- ## PERCENT_RANK-sqlx
+
+- Percent_rank() over(pratition by deptno order by sal desc)
+
+- 윈도우별 행의 순서별 백분률
+
+- ## CUME_DIST-sqlx
+
+- Cume_dist() over(partion by deptno order by sal desc)
+
+- 현재 행보다 작거나 같은 건수에 대한 누적 백분율을 구한다.
+
+- 
+
+- ## NTILE -sqlx
+
+- NTLE(4) over(order by sal desc)
+
+- 인자값으로 n등분한 결과를 구할 수있다.
+
+  
+
+  
+
+  
