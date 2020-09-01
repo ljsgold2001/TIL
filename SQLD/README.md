@@ -1421,6 +1421,9 @@
 
 - 논리적 순서는 having 과 group by의 순서가 바뀌어 서 실행된다.
   
+  
+  
+  
 
 - K-리그의 선수들 중 삼성블루윙즈(K02)와 FC서울(K09)의 인원수는 얼마인가란 요구 사항이 접수되었다. WHERE 절과 GROUP BY 절을 사용한 SQL과 GROUP BY 절과 HAVING 절을 사용한 SQL을 모두 작성한다.
 
@@ -1665,6 +1668,9 @@
 
   
   
+  
+  
+  
 
 -  SELECT PLAYER.PLAYER_NAME, PLAYER.BACK_NO, PLAYER.TEAM_ID, TEAM.TEAM_NAME, TEAM.REGION_NAME
    FROM PLAYER INNER JOIN TEAM 
@@ -1679,7 +1685,6 @@
 - SELECT P.PLAYER_NAME 선수명, P.BACK_NO 백넘버, P.TEAM_ID 팀코드, T.TEAM_NAME 팀명, T.REGION_NAME 연고지
   FROM PLAYER P, TEAM T 
   WHERE P.TEAM_ID = T.TEAM_ID; 
-
 
   또는 INNER JOIN을 명시하여 사용할 수도 있다. 
 
@@ -1755,12 +1760,18 @@
 
 - 또는 INNER JOIN을 명시하여 사용할 수도 있다. 
   
+  
+  
+  
 
 - SELECT T.REGION_NAME, T.TEAM_NAME, T.STADIUM_ID, S.STADIUM_NAME, S.SEAT_COUNT 
   FROM TEAM T INNER JOIN STADIUM S 
   ON T.STADIUM_ID = S.STADIUM_ID; 
 
 - 중복이 되지 않는 칼럼의 경우 ALIAS를 사용하지 않아도 되므로, 아래 SQL 문은 위 SQL문과 같은 결과를 얻을 수 있다. 그러나 같은 이름을 가진 중복 칼럼의 경우는 테이블명이나 ALIAS가 필수 조건이다. 
+  
+  
+  
   
 
 - SELECT REGION_NAME, TEAM_NAME, T.STADIUM_ID, STADIUM_NAME, SEAT_COUNT
@@ -1893,8 +1904,14 @@
 
 -  위 SQL과 아래 SQL은 같은 결과를 얻을 수 있다. 
   
+  
+  
+  
 
 - FROM 절 JOIN 조건 
+  
+  
+  
   
 
 - SELECT EMP.DEPTNO, EMPNO, ENAME, DNAME 
@@ -2487,7 +2504,7 @@ ORDER BY 1;
 
 - ### ROLLUP
 
--	Grouping colums의 수가 N이면 N+1 level의 subtotal이 생성됨
+- Grouping colums의 수가 N이면 N+1 level의 subtotal이 생성됨
 
 
 
@@ -2721,8 +2738,475 @@ GROUP BY CUBE (DNAME, JOB) ;
 
 - 인자값으로 n등분한 결과를 구할 수있다.
 
-  
+- 
+
+- # DCL
+
+- 트렌잭션을 제어하기 위한 명령어
+
+- ![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_223.jpg)
+
+- DB 접속방법
+
+  - 오라클
+    - 유저를 통해 데이터베이스에 접속하는 형태
+    - 아이디와 비밀번호 방식으로 인스턴스에 접속
+  - SQL SERVER
+    - 로그인을 생성해햐함
+    - 인스턴스 내에 존재하는 다수의 데이터베이스에 연결하기위하여 유저를 생성하고 로그인과 유저를 매핑해야한다.
+      - 로그인의 두가지 방식
+        - windows 에 로그인한 정보를 가지고 SQL SERVER에 접속하는 방 즉, window에서 사용자 ID를 확인한다.(kerberos방식보안프로토콜)
+        - 혼합모드(SQL + window) 숫자 +문자 + 특수문자
 
   
 
-  
+- 일반적으로 시스템권한은 일일이 유저에게 부여되지 않는다.
+
+  **오라클**
+
+- Oracle CONN SCOTT/TIGER 연결되었다
+  CREATE USER PJS IDENTIFIED BY KOREA7; 
+  CREATE USER PJS IDENTIFIED BY KOREA7; 
+
+  - 오류발생 SCOTT은 그러한 권한이 없다. 권한을 부여해야함
+
+- GRANT CREATE USER TO SCOTT - create 권한을 부여
+  - CREATE USER PJS IDENTIFIED BY KOREA7 성공
+
+
+
+​	**SQL**
+
+- Server CREATE LOGIN PJS WITH PASSWORD='KOREA7', DEFAULT_DATABASE=AdventureWorks ->최초로 접속시
+
+- **데이터베이스로 이동**
+
+- USE ADVENTUREWORKS; 
+  GO CREATE USER PJS FOR LOGIN PJS WITH DEFAULT_SCHEMA = dbo;
+
+- **생성된 PJS로 로그인**
+
+- 오라클 CONN PJS/KOREA7; 
+
+  - 오 라클 CREATE SESSION권한이 없음
+  - GRANT CREATE SESSION TO PJS;
+
+- **PJS 유저로 테이블 생성**
+
+-  CREATE TABLE MENU ( MENU_SEQ INT NOT NULL, TITLE VARCHAR(10) );
+
+  - 오류 : 테이블 생성권한이 없다.
+
+  - **오라클**
+
+    - CONN SYSTEM/MANAGER 
+      GRANT CREATE TABLE TO PJS;
+       CONN PJS/KOREA7
+
+       CREATE TABLE MENU ( MENU_SEQ NUMBER NOT NULL, TITLE VARCHAR2(10) ); 생성 완료
+
+  - SQL-SERVER
+
+    - GRANT CREATE TABLE TO PJS; 
+      GRANT Control ON SCHEMA::dbo TO PJS
+      CREATE TABLE MENU ( MENU_SEQ INT NOT NULL, TITLE VARCHAR(10) ); 
+
+### object 권한
+
+- if PJS유저가 생성한 테이블을 SCOTT의 유저가 접속하면 어떻게될까?
+  - SQL은 유저는 단지 스키마에 대한 권한만을 가진다.
+  - 먼저 SCOTT 유저로 접속하여 PJS.menu 테이블을 조회한다. (객체가 소유한 유저이름을 붙여서 but sql은 스키마의 이름을 붙여야한다.)
+- 오라클
+  - CONN SCOTT/TIGER
+  - SELECT * FROM PJS.MENU; **오류**
+- SQL
+  -  SELECT * FROM dbo.MENU; **오류**
+- 해결
+  - PJS로 접속하여 SCOTT에게 테이블 select 권한을 준다.
+- GRANT SELECT ON MENU TO SCOTT; 
+
+### ROLE 을 이용한 권한 부여
+
+- 매번 해줄수 없기때문에 중개 역할을 하는 ROLE을 제공한다.
+- 시스템 권한과 오브젝트 권한을 모두 부여할수있다.
+- 유저에게 직접도 가능하고 , role에 포함하여 부여될수도 있다.
+
+
+
+- [예제] JISUNG 유저에게 CREATE SESSION과 CREATE TABLE 권한을 가진 ROLE을 생성한 후 ROLE을 이용하여 다시 권한을 할당한다. 권한을 취소할 때는 REVOKE를 사용한다.
+- 오라클
+- REVOKE CREATE SESSION, CREATE TABLE FROM JISUNG; 
+  - 에러 jinsung은 create session 권한을 가지고 있지 않다.
+- SQL
+  - REVOKE CREATE TABLE FROM PJS;
+- [예제] 이제 LOGIN_TABLE이라는 ROLE을 만들고, 이 ROLE을 이용하여 JISUNG 유저에게 권한을 부여한다.
+- Oracle CONN SYSTEM/MANAGER 연결되었다. 
+  CREATE ROLE LOGIN_TABLE; 롤이 생성되었다. 
+  GRANT CREATE SESSION, CREATE TABLE TO LOGIN_TABLE; 권한이 부여되었다. GRANT LOGIN_TABLE TO JISUNG; 권한이 부여되었다. 
+  CONN JISUNG/KOREA7 연결되었다. 
+  CREATE TABLE MENU2( MENU_SEQ NUMBER NOT NULL, TITLE VARCHAR2(10)); 테이블이 생성되었다.
+
+![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_227.jpg)
+
+- SQL에서는 ROLE을 생성하여 사용하기 보다는 기본적으로 제공되는 ROLE에 멤버로 참여하는 방식
+- ![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_228.jpg)
+- ![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_229.jpg)
+
+
+
+# 절차형 SQL
+
+- 프로시저 , 사용자 정의함수 , 트리거
+
+- PL/SQL은 블록 구조로 되어있어 각 기능별로 모듈화 가능
+
+- 오라클에는 PL/SQL이 내장되어잇다. 여러SQL을 블록으로 묶고 한번에 전부 서버로 보낸다.
+
+- ![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_231.jpg)
+
+- DECLARE
+
+  - Begin - end절에서 사용될 변수와 인수에 대한 정의 및 데이터를 선언한다.
+
+- BEGIN - END
+
+  - SQL과 여러가지 비교문, 제어문 을 이용하여 필요한 로직을 처리하는 실행부
+
+- EXCEPTION
+
+  - 에러가 발생했을 경우에 어떻게 처리할 것인지를 정의하는 부분
+
+- ### PL/SQL 기본 문법
+
+- CREATE [OR REPLACE] Procedure [Procedure_name] ( argument1 [mode] data_type1, argument2 [mode] date_type2, ... ... )
+   IS [AS] ... ... 
+  BEGIN ... ... 
+  EXCEPTION ... ... 
+  END; /
+
+- DROP Procedure [Procedure_name];
+
+- or replace 절은 기존의 프로시저를 무시하고 새로운 내용으로 덮어쓰기 하겠다.
+
+- mode에는 세가지가 있다. 
+
+  - IN : 운영체제에서 프로시저로 전달될 변수
+  - OUT : 프로시저에서 처리된 결과를 운영체제로 전달
+  - INOUT :둘다 실행한다.
+
+
+
+- ### T -SQL
+
+- SQL-server를 제어하기위해 ms에서 ANSI/ISO표준에 더한기능
+
+- @@전역변수 / @ 지역변수
+
+- 자료형 선언가능
+
+- 연산자 가능
+
+- 흐름제어 IF-ELSE , WHILE , CASE-THEN 가능
+
+- 오라클은 OR REPLACE 가능하지만 SQL은 create /alter 구문으로 변경해야함
+
+- with 옵션
+
+  - recompile : 런타임에 컴파일 된다.
+  - ENCRYPTIONCREATE PROCEDUR : 텍스트가 알아보기 어려운 형식으로 변환된다.
+    - 카탈로그 뷰 어디에도 직접 표시되지않음으로 백업해두어야함
+  - EXECUTE AS :보안 콘텍스트를 지정한다
+
+
+
+- ![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_233.jpg)
+
+- 오라클
+
+  - CREATE OR REPLACE Procedure p_DEPT_
+    insert -------------① ( v_DEPTNO in number, v_dname in varchar2, v_loc in varchar2, v_result out varchar2) IS cnt number := 0; 
+    BEGIN 
+    	SELECT COUNT(*) INTO CNT -------------② 
+    	FROM DEPT WHERE DEPTNO = v_DEPTNO AND ROWNUM = 1; 
+    			if 
+    				cnt > 0 then -------------③ v_result := '이미 등록된 부서번호이다'; 
+    			else 
+    				INSERT INTO DEPT (DEPTNO, DNAME, LOC) -------------④ VALUES 				(v_DEPTNO, v_dname, v_loc); 
+    				COMMIT; -------------⑤ v_result := '입력 완료!!'; 
+    			end if; 
+    				EXCEPTION -------------⑥ 
+    					WHEN OTHERS 
+    						THEN 
+    					ROLLBACK; 
+    						v_result := 'ERROR 발생'; 
+    END; 
+
+- SQL-SERVER
+
+  - CREATE Procedure dbo.p_DEPT_
+    		insert -------------① @v_DEPTNO int, @v_dname varchar(30), @v_loc 		
+    		varchar(30), @v_result varchar(100) OUTPUT AS 
+    DECLARE 
+    		@cnt int SET 
+    		@cnt = 0 
+    		BEGIN 
+    			SELECT @cnt=COUNT(*) -------------② 
+    			FROM DEPT 
+    			WHERE DEPTNO = @v_DEPTNO 
+    				IF @cnt > 0 -------------③ 
+    					BEGIN SET @v_result = '이미 등록된 부서번호이다' 
+    						RETURN 
+    						END 
+    				ELSE 
+    						BEGIN 
+    							BEGIN TRAN 
+    									INSERT INTO DEPT (DEPTNO, DNAME, LOC) -------------④ 									VALUES (@v_DEPTNO, @v_dname, @v_loc) 
+    									IF @@ERROR<>0 
+    											BEGIN ROLLBACK -------------⑥ 
+    											SET @v_result = 'ERROR 발생' 
+    											RETURN 
+    											END 
+    									ELSE 
+    											BEGIN 
+    											COMMIT -------------⑤ 
+    									SET @v_result = '입력 완료!!' 
+    									RETURN 
+    END 
+    END 
+    END
+
+  ## 사용자 정의 함수
+
+  - SUM ,SUBSTR , NVL등의 함수는 벤더에서 미리 만들수있다.
+  - RETURN이 반드시 있어야한다.
+
+
+
+-  K-리그 8월 경기결과와 두 팀간의 점수차를 ABS 함수를 사용하여 절대값으로 출력한다.
+  - SELECT SCHE_DATE 경기일자, HOMETEAM_ID || ' - ' || AWAYTEAM_ID 팀들, HOME_SCORE || ' - ' || AWAY_SCORE SCORE, ABS(HOME_SCORE - AWAY_SCORE) 점수차 
+    FROM SCHEDULE 
+    WHERE GUBUN = 'Y' AND SCHE_DATE BETWEEN '20120801' AND '20120831' ORDER BY SCHE_DATE;
+- ABS함수를 만들어야한다면
+  - CREATE OR REPLACE Function UTIL_ABS (v_input in number) ---------------- ① return NUMBER IS v_return number := 0; ---------------- ② BEGIN if v_input < 0 then ---------------- ③ v_return := v_input * -1; else v_return := v_input; end if; RETURN v_return; ---------------- ④ END; /
+
+
+
+- ## 트리거
+
+  - DML문이 수행되었을때 데이터베이스에서 자동적으로 동작하게 작성된 프로그램
+  - 사용자가 직접호출하는것이 아니다.
+    - CREATE OR REPLACE Trigger SUMMARY_SALES ---------------- ① 
+      AFTER INSERT ON ORDER_LIST FOR EACH ROW 
+      DECLARE ---------------- ② 
+      	o_date ORDER_LIST.order_date%TYPE; o_prod 			
+      	ORDER_LIST.product%TYPE; 
+      	BEGIN 
+      			o_date := :NEW.order_date; o_prod := :NEW.product; 
+      			UPDATE SALES_PER_DATE ---------------- ③ 
+      			SET qty = qty + :NEW.qty, amount = amount + :NEW.amount 		
+      			WHERE sale_date = o_date AND product = o_prod; 
+      					if SQL%NOTFOUND 
+      								then ---------------- ④ 
+      									INSERT INTO SALES_PER_DATE VALUES(o_date, 
+      									o_prod, :NEW.qty, :NEW.amount); 
+      					end if; 
+      					END; 
+
+- On EACH ROW : 각 row 마다 트리거 적용
+
+- :NEW : 신규로 입력된 레코드의 정보를 가지고 있는 구조체
+
+- :OLD : 수정, 삭제 되기 전에 레코드를 가지고 있는 구조체
+
+- ![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_238.jpg)
+
+- 프로시저는 Begin-end절에 commit , rollback 같은 TCL 사용가능하다.
+
+- 트리거는 begin-end 절에 TCL 사용 불가하다.
+
+
+
+# 2-3장
+
+## 옵티마이저
+
+- 다양한 실행방법들 중에서 최적의 실행 방법을 결정하는 것이다.
+
+- 관계형 데이터베이스는 전달할 뿐이다.
+
+- ![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_239.jpg)
+
+- ### 규칙기반 옵티마이저
+
+  - 규칙(우선순위를)가지고 실행계획 생성
+  - 1순위 single row by rowid
+    - 하나의 행을 엑세스 , 참조하지 않아도 엑세스 가능
+  - 2 순위 single row by unique or primary key
+    - 유일 인덱스를 통해서 접근
+  - 3순위 composite index
+    - A+B+C인덱스 우선순위
+  - 4순위 Single column index
+    - = 조건으로 검색하는 경우
+  - 5순위 Bounded range search on indexed columns
+    -  between등
+  - 6순위 : Unbounded range search on indexed columns :
+    - 한쪽 컬럼만 지정
+  - 7순위
+    - full table scan
+
+- ### 비용기반 옵티마이저
+
+  - 실행하는 비용이 가장 적은 실행계획을 선택한다.
+  - ![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_241.jpg)
+  - 대안 계획 생성기 :
+    -  동일한 결과를 생성하는 다양한 대안 계획을 생성하는 모듈이다.
+    - 연산의 적용 순서 변경, 연산 방법 변경, 조인 순서 변경 등을 통해서 생성된다
+  - 비용예측기
+    -  비용 예측기는 대안 계획 생성기에 의해서 생성된 대안 계획의 비용을 예측하는 모듈이다
+    - 집합의 크기 ,분포도 등등
+
+- ### 실행계획
+
+- 요구사항을 처리하기 위한 절차와 방법
+
+  - 조인순서
+  - 조인기법
+  - 엑세스기법
+    - 하나의 테이블을 엑세스할때 사용
+  - 최적화정보
+    - 비용을 나타낸 것
+  - 연산
+
+- ### SQL 자료 흐름도
+
+- ![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_243.jpg)
+
+- 조인순서 TAB1 -> TAB2
+
+- TAB1은 outer table , driving table이라고 한다.
+
+- TAB2 는 inner table , lookup table
+
+- I01_TAB2 방식을 이용하여 인덱스 스캔, 랜덤방식
+
+
+
+# 인덱스
+
+- 트리기반 인덱스
+
+  - B 트리 인덱스
+
+    - 브랜치 블록과 리프블록으로 구성된다.
+
+    - ![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_244.jpg)
+
+    - 리프블록은 RID 로구성되어있다.
+
+    - 인덱스의 데이터 값이 동일하면 식별자의 순서대로
+
+    - 리프블록은 양방향 링크
+
+    - = ,> ,between에 적합하다.
+
+    - 작으면 왼쪽 포인터 크면 오른쪽포인터 사이값이면 중간 포인터
+
+      
+
+      
+
+  - SQL server의 클러스터형 인덱스
+
+    - 리프페이지가 곧 데이터 페이지이다.
+    - 레코드 식별자가 리프 페이지에 없다.
+    - 클러스터형 인덱스 (사전)
+    - 리프 페이지의 모든 로우는 인덱스 컬럼순으로 물리적으로 정렬된다.
+    - 로우는 한가지 순서로만 정렬될수있다.
+    - 클러스터형 인덱스는 테이블당 한개만
+
+- ## 전체 테이블 스캔과 인덱스 테이블 스캔
+
+- 전체테이블은 존재하는 모든 데이터를 읽고 맞으면 찾음
+
+- 전체테이블 조건
+
+  - SQL 조건 만족하지 않을때
+  - 사용가능 인덱스가 존재하지 않을때
+  - 옵티마이저의 취사 선택
+  - 병렬처리,힌트사용
+
+- 인덱스 스캔
+
+  - 트리기반 인덱스
+  - 컬럼값을 기반으로 데이터를 추출한다.
+  - 인덱스 유일 스캔
+    - 단하나의 데이터로 추출하는 방식, 
+    - 중복을 허락하지 않는다.
+    - 단 1건
+  - 인덱스 범위 스캔
+    - 한건 이상의 데이터를 추출
+  - 인덱스 역순 스캔
+    - 최대값을 decending으로 빠르게 찾을 수있다.
+  - 인덱스 전체 스캔 , 인덱스 고속 전체스캔, 인덱스 스킵 스캔
+
+- ![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_249.jpg)
+
+- 인덱스 스캔은 다른 블록을 더 읽을 필요가 없다.
+
+
+
+## 조인 기법
+
+## NL join
+
+ - FOR 선행 테이블 읽음 → 외부 테이블(Outer Table) FOR 후행 테이블 읽음 → 내부 테이블(Inner Table) (선행 테이블과 후행 테이블 조인)
+
+ - 모든 행만큼
+
+ - 선행 테이블의 조건을 만족하는 행의수가 많으면 그만큼한다.
+
+ - 따라서 크기가 작은것을 선행테이블로 선택해야한다.
+
+ - 추출버퍼는 모두 차거나 더이상 결과가 없으면 반환
+
+ - 가능한 결과를 빨리 보여줘야 하는 온라인 프로그램에 적당함
+
+ - ![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_250.jpg)
+
+   
+
+
+
+## SORT MERGE JOIN
+
+- NL join은 주로 랜덤 엑세스 방식으로 읽는다.
+
+- 대용량 방식으로 읽어야할때 넓은 범위를 읽을때 사용된다.
+
+- 정렬작업이 필요하면 hash join이 낫다.
+
+- 이것은 비동등 조인에서도 사용이 가능하다.
+
+- 조인 컬럼의 인덱스를 사용하지 않기때문에 조인 컬럼의 인덱스가 없어도 사용가능
+
+- ![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_251.jpg)
+
+- ## Hash join
+
+- 해시 기법을 이용하여 조인을 수행한다.
+
+- 위의 두개의 문제와 부담을 줄이는 기법
+
+- ![sql가이드](http://www.dbguide.net/publishing/img/knowledge/SQL_252.jpg)
+
+- 조인 컬럼의 인덱스가 존재하지 않아도 사용할 수있다.
+
+- = 로 수행하는 조인 , 즉 동등 조인에서만 사용한다.
+
+- 해쉬값 알수 없다.
+
+- 해쉬 테이블의 크기가 더커지면 임시 영역에 해쉬 테이블 저장
+
+- 따라서 행의수가 적은 테이블을 선행테이블로 저장
+
+- 선행테이블 build input 후행테이블을 prove input
