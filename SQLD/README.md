@@ -556,7 +556,7 @@
 
   - ALTER TABLE 테이블명 MODIFY (칼럼명1 데이터 유형 [DEFAULT 식] [NOT NULL], 칼럼명2 데이터 유형 …);
   - LTER TABLE TEAM_TEMP MODIFY (ORIG_YYYY VARCHAR2(8) DEFAULT '20020129' NOT NULL);
-  - SQL SERVER
+  - SQL SERVER**&&**
     - ALTER TABLE TEAM_TEMP ALTER COLUMN ORIG_YYYY VARCAHR(8) NOT NULL; 
     - ALTER TABLE TEAM_TEMP ADD CONSTRAINT DF_ORIG_YYYY DEFAULT '20020129' FOR ORIG_YYYY; 
 
@@ -599,7 +599,7 @@
 
 - DROP TABLE 테이블명 [CASCADE CONSTRAINT];
 
-  - 제약조건들도 다 삭제한다는 것을 의미한다.
+  - 제약조건들도 다 삭제한다는 것을 의미한다.**$$**
   - sql에서는 테이블을 삭제하기전에 참조하는 foreign key 제약조건 또는 참조하는 테이블을 먼저 삭제해야한다.
     - DROP TABLE PLAYER
 
@@ -3209,4 +3209,6 @@ GROUP BY CUBE (DNAME, JOB) ;
 
 - 따라서 행의수가 적은 테이블을 선행테이블로 저장
 
-- 선행테이블 build input 후행테이블을 prove input
+- 선행테이블 build input 후행테이블을 
+
+- 
