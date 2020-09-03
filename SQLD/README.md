@@ -1224,46 +1224,46 @@
 
   - SELECT LOC, 
     		CASE LOC
-    			 WHEN
-    						 'NEW YORK' THEN 'EAST' 
-    			 WHEN 
-    						 'BOSTON' THEN 'EAST' 
-    		     WHEN 
-    						 'CHICAGO' THEN 'CENTER' 
-    			 WHEN
-    						 'DALLAS' THEN 'CENTER' 
-    			 ELSE 
-    						 'ETC' 
-    		END as AREA
+      			 WHEN
+      						 'NEW YORK' THEN 'EAST' 
+      			 WHEN 
+      						 'BOSTON' THEN 'EAST' 
+      		     WHEN 
+      						 'CHICAGO' THEN 'CENTER' 
+      			 WHEN
+      						 'DALLAS' THEN 'CENTER' 
+      			 ELSE 
+      						 'ETC' 
+      		END as AREA
     FROM DEPT;
 
 - 사원 정보에서 급여가 3000 이상이면 상등급으로, 1000 이상이면 중등급으로, 1000 미만이면 하등급으로 분류하라.
 
   - SELECT ENAME, 
     		CASE
-    			 WHEN 
-    				SAL >= 3000 THEN 'HIGH' 
-    			 WHEN 
-    				SAL >= 1000 THEN 'MID' 
-    			 ELSE
-    				 'LOW' 
-    			 END AS SALARY_GRADE 
+      			 WHEN 
+      				SAL >= 3000 THEN 'HIGH' 
+      			 WHEN 
+      				SAL >= 1000 THEN 'MID' 
+      			 ELSE
+      				 'LOW' 
+      			 END AS SALARY_GRADE 
     FROM EMP;
 
 - 사원 정보에서 급여가 2000 이상이면 보너스를 1000으로, 1000 이상이면 5000으로, 1000 미만이면 0으로 계산한다.
 
   - SELECT ENAME,SAL
     		CASE
-    			WHEN
-    				SAL >=2000 THEN 1000
-    			ELSE(
-    				CASE
-    					WHEN 
-    						SAL >=1000 THEN 5000
-    					ELSE
-    						0
-    				END)
-    		END as BONUS
+      			WHEN
+      				SAL >=2000 THEN 1000
+      			ELSE(
+      				CASE
+      					WHEN 
+      						SAL >=1000 THEN 5000
+      					ELSE
+      						0
+      				END)
+      		END as BONUS
     FROM EMP;
 
 - ### NULL 관련함수
@@ -1297,10 +1297,10 @@
       WHERE TEAM_ID = 'K08'
       - SELECT PLAYER_NAME 선수명, POSITION, 
                   CASE** 
-        				**WHEN POSITION IS NULL**
-        					 **THEN '없음'** 
-        				**ELSE POSITION** 
-        		END AS 포지션** 
+          				**WHEN POSITION IS NULL**
+          					 **THEN '없음'** 
+          				**ELSE POSITION** 
+          		END AS 포지션** 
         FROM PLAYER 
         WHERE TEAM_ID = 'K08'
 
@@ -1336,10 +1336,10 @@
     FROM EMP;
     - SELECT ENAME, EMPNO, MGR, 
       		CASE 
-      			WHEN MGR = 7698 
-      					THEN NULL 
-      			ELSE MGR 
-      		END
+        			WHEN MGR = 7698 
+        					THEN NULL 
+        			ELSE MGR 
+        		END
       FROM EMP;
 
 - ### COALESCE
@@ -1353,15 +1353,15 @@
     FROM EMP;
     - SELECT ENAME, COMM, SAL, 
       		CASE 
-      				WHEN COMM IS NOT NULL 
-      							THEN COMM
-      				ELSE 
-      						(CASE 
-      								WHEN SAL IS NOT NULL 
-      										THEN SAL 
-      								ELSE NULL 
-      						END) 
-      		END COAL
+        				WHEN COMM IS NOT NULL 
+        							THEN COMM
+        				ELSE 
+        						(CASE 
+        								WHEN SAL IS NOT NULL 
+        										THEN SAL 
+        								ELSE NULL 
+        						END) 
+        		END COAL
        FROM EMP;
 
 
@@ -1553,7 +1553,7 @@
     			ORDER BY MGR);
     - SELECT MGR FROM (SELECT EMPNO, ENAME 
       									FROM EMP 
-      									ORDER BY MGR); 
+        									ORDER BY MGR); 
       **에러발생 SELECT MGR FROM ; * ERROR: "MGR": 부적합한 식별자**
       - 인쿼리 안에 없기 때문이다.
     - SELECT JOB, SAL 
@@ -1742,8 +1742,7 @@
   
 
 - 또는 INNER JOIN을 명시하여 사용할 수도 있다.
-   
-
+  
 - SELECT TEAM.REGION_NAME, TEAM.TEAM_NAME, TEAM.STADIUM_ID, STADIUM.STADIUM_NAME, STADIUM.SEAT_COUNT
   FROM TEAM INNER JOIN STADIUM 
   ON TEAM.STADIUM_ID = STADIUM.STADIUM_ID;
@@ -2444,7 +2443,7 @@ ORDER BY 1;
   - 인라인 뷰의 컬럼은 어디서든지 사용가능하다.
     - SELECT T.TEAM_NAME 팀명, P.PLAYER_NAME 선수명, P.BACK_NO 백넘버 FROM (SELECT TEAM_ID, PLAYER_NAME, BACK_NO
       						 FROM PLAYER 
-      						 WHERE POSITION = 'MF') P, TEAM T 
+        						 WHERE POSITION = 'MF') P, TEAM T 
       WHERE P.TEAM_ID = T.TEAM_ID 
       ORDER BY 선수명;
   - 오라클
@@ -2570,15 +2569,15 @@ ORDER BY 1;
 
 - SELECT 
   	CASE GROUPING(DNAME) 
-  		WHEN 1 
-  				THEN 'All Departments' 
-  		ELSE DNAME 
-  				END AS DNAME, 
-  	CASE GROUPING(JOB) 
-  			WHEN 1 
-  				THEN 'All Jobs' 
-  			ELSE JOB 
-  				END AS JOB, COUNT(*) "Total Empl", SUM(SAL) "Total Sal" 
+    		WHEN 1 
+    				THEN 'All Departments' 
+    		ELSE DNAME 
+    				END AS DNAME, 
+    	CASE GROUPING(JOB) 
+    			WHEN 1 
+    				THEN 'All Jobs' 
+    			ELSE JOB 
+    				END AS JOB, COUNT(*) "Total Empl", SUM(SAL) "Total Sal" 
   FROM EMP, DEPT 
   WHERE DEPT.DEPTNO = EMP.DEPTNO 
   GROUP BY ROLLUP (DNAME, JOB); 
@@ -2649,7 +2648,7 @@ GROUP BY CUBE (DNAME, JOB) ;
 
   - SELECT JOB, ENAME, SAL, 
     	RANK( ) OVER (ORDER BY SAL DESC) ALL_RANK, 
-    	RANK( ) OVER (PARTITION BY JOB ORDER BY SAL DESC) JOB_RANK 
+      	RANK( ) OVER (PARTITION BY JOB ORDER BY SAL DESC) JOB_RANK 
     FROM EMP;
   - RANK 함수는 ORDER BY를 포함한 QUERY 문에서 특정 항목(칼럼)에 대한 순위를 구하는 함수이다.
   - 이때 특정 범위(PARTITION) 내에서 순위를 구할 수도 있고 전체 데이터에 대한 순위를 구할 수도 있다. 또한 동일한 값에 대해서는 동일한 순위를 부여하게 된다.
@@ -2771,6 +2770,7 @@ GROUP BY CUBE (DNAME, JOB) ;
   - 오류발생 SCOTT은 그러한 권한이 없다. 권한을 부여해야함
 
 - GRANT CREATE USER TO SCOTT - create 권한을 부여
+  
   - CREATE USER PJS IDENTIFIED BY KOREA7 성공
 
 
@@ -2945,7 +2945,7 @@ GROUP BY CUBE (DNAME, JOB) ;
 
   - CREATE Procedure dbo.p_DEPT_
     		insert -------------① @v_DEPTNO int, @v_dname varchar(30), @v_loc 		
-    		varchar(30), @v_result varchar(100) OUTPUT AS 
+      		varchar(30), @v_result varchar(100) OUTPUT AS 
     DECLARE 
     		@cnt int SET 
     		@cnt = 0 
@@ -3211,4 +3211,4 @@ GROUP BY CUBE (DNAME, JOB) ;
 
 - 선행테이블 build input 후행테이블을 
 
-- 
+- 마무리
